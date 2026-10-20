@@ -1,0 +1,44 @@
+/* Theme tokens. Every colour, radius and font comes from here. */
+:root {
+  --bg: #0b0c10;
+  --bg-2: #111318;
+  --surface: #15171d;
+  --surface-2: #1b1e26;
+  --hover: rgba(255, 255, 255, 0.045);
+  --line: rgba(255, 255, 255, 0.075);
+  --line-2: rgba(255, 255, 255, 0.13);
+  --text: #eceef3;
+  --text-2: #a3a8b6;
+  --text-3: #6b7080;
+  --accent: #7c8cff;
+  --accent-2: #a5b0ff;
+  --accent-soft: rgba(124, 140, 255, 0.14);
+  --danger: #ff6b7a;
+  --ok: #4ade9a;
+  --shadow: 0 18px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--line);
+  --radius: 14px;
+  --radius-sm: 9px;
+  --font: "Inter", "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "JetBrains Mono", "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg: #f7f7f9;
+  --bg-2: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f1f2f5;
+  --hover: rgba(15, 20, 40, 0.04);
+  --line: rgba(15, 20, 40, 0.08);
+  --line-2: rgba(15, 20, 40, 0.14);
+  --text: #15171d;
+  --text-2: #555b6b;
+  --text-3: #8a90a0;
+  --accent: #5b6cf5;
+  --accent-2: #4453d8;
+  --accent-soft: rgba(91, 108, 245, 0.1);
+  --danger: #e5394d;
+  --ok: #17a067;
+  --shadow: 0 18px 50px -14px rgba(20, 25, 50, 0.22), 0 0 0 1px var(--line);
+  color-scheme: light;
+}

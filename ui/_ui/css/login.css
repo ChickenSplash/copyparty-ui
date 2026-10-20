@@ -1,0 +1,18 @@
+/* Sign-in screen. */
+.login {
+  min-height: 100%; display: grid; place-items: center; padding: 24px;
+  background:
+    radial-gradient(700px 400px at 50% -10%, var(--accent-soft), transparent 70%),
+    var(--bg);
+}
+.login-card {
+  width: min(360px, 100%); text-align: center;
+  padding: 36px 30px 28px; border-radius: 20px;
+  background: var(--surface); box-shadow: var(--shadow);
+  display: grid; gap: 12px;
+}
+.login-card h1 { margin: 0; font-size: 22px; letter-spacing: -0.02em; }
+.login-card p { margin: 0 0 8px; }
+.login-err { color: var(--danger); min-height: 1.2em; font-size: 13px; margin: 0 !important; }
+.shake { animation: shake .35s; }
+@keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }

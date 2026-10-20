@@ -1,0 +1,43 @@
+/* Full-screen file viewer. */
+.viewer {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(5, 6, 9, 0.94); backdrop-filter: blur(10px);
+  display: grid; grid-template-rows: auto 1fr;
+  color: #eceef3; animation: fade .15s;
+}
+@keyframes fade { from { opacity: 0; } }
+.viewer .icon-btn { color: #c6cad6; }
+.viewer .icon-btn:hover { background: rgba(255,255,255,.08); color: #fff; }
+.viewer-bar { display: flex; align-items: center; gap: 12px; padding: 12px 14px 12px 22px; }
+.viewer-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.viewer-meta { margin-right: auto; font-size: 13px; color: #8a90a0; white-space: nowrap; }
+.viewer-body { min-height: 0; display: grid; place-items: center; padding: 0 72px 28px; }
+.viewer-body img, .viewer-body video {
+  max-width: 100%; max-height: calc(100dvh - 90px); border-radius: 10px;
+  box-shadow: 0 30px 80px -20px rgba(0,0,0,.8);
+}
+.viewer-body audio { width: min(520px, 100%); }
+.viewer-body iframe { width: 100%; height: 100%; border: 0; border-radius: 10px; background: #fff; }
+.viewer-body iframe { height: calc(100dvh - 90px); }
+.viewer-body pre {
+  width: min(960px, 100%); max-height: calc(100dvh - 90px); overflow: auto; margin: 0;
+  padding: 22px 26px; border-radius: 12px;
+  background: #12141a; border: 1px solid rgba(255,255,255,.08);
+  font: 13px/1.6 var(--mono); color: #d8dbe4; white-space: pre-wrap; word-break: break-word;
+}
+.viewer-body .nopreview { text-align: center; color: #8a90a0; }
+.viewer-body .nopreview .ficon { width: 72px; height: 72px; border-radius: 18px; margin: 0 auto 16px; background: rgba(255,255,255,.06); }
+.viewer-body .nopreview .ficon .i { width: 34px; height: 34px; }
+.viewer-nav {
+  position: fixed; top: 50%; transform: translateY(-50%);
+  width: 46px; height: 46px; border-radius: 50%;
+  display: grid; place-items: center; color: #fff;
+  background: rgba(255,255,255,.07); transition: background .15s;
+}
+.viewer-nav:hover { background: rgba(255,255,255,.15); }
+.viewer-nav.prev { left: 14px; } .viewer-nav.next { right: 14px; }
+
+@media (max-width: 760px) {
+  .viewer-body { padding: 0 10px 20px; }
+  .viewer-nav { display: none; }
+}

@@ -1,0 +1,41 @@
+/* Menus, dialogs and toasts. */
+/* menu */
+.menu {
+  position: fixed; z-index: 70; min-width: 190px; padding: 6px;
+  background: var(--surface); border-radius: 12px; box-shadow: var(--shadow);
+  animation: pop .12s ease-out;
+}
+@keyframes pop { from { opacity: 0; transform: scale(.97); } }
+.menu button, .menu a {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 8px 10px; border-radius: 8px; font-size: 13.5px; text-align: left;
+}
+.menu button:hover, .menu a:hover { background: var(--hover); }
+.menu .i { width: 16px; height: 16px; color: var(--text-2); }
+.menu .danger, .menu .danger .i { color: var(--danger); }
+.menu hr { border: 0; border-top: 1px solid var(--line); margin: 5px 4px; }
+
+/* dialog */
+.dialog {
+  width: min(420px, calc(100vw - 32px)); padding: 0; border: 0;
+  border-radius: 18px; background: var(--surface); color: var(--text); box-shadow: var(--shadow);
+}
+.dialog::backdrop { background: rgba(0,0,0,.5); backdrop-filter: blur(3px); }
+.dialog[open] { animation: pop .15s ease-out; }
+.dialog form { padding: 22px; display: grid; gap: 14px; }
+.dialog h2 { margin: 0; font-size: 17px; letter-spacing: -0.01em; }
+.dialog p { margin: 0; color: var(--text-2); }
+.dialog .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+.dialog .btn.primary.danger { background: var(--danger); color: #fff; box-shadow: none; }
+
+/* toasts */
+.toasts { position: fixed; left: 50%; top: 72px; transform: translateX(-50%); z-index: 80; display: grid; gap: 8px; justify-items: center; pointer-events: none; }
+.toast {
+  display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+  border-radius: 12px; background: var(--surface); box-shadow: var(--shadow);
+  font-size: 13.5px; animation: drop .2s ease-out;
+}
+.toast .i { width: 16px; height: 16px; }
+.toast.ok .i { color: var(--ok); } .toast.err .i { color: var(--danger); }
+.toast.out { opacity: 0; transform: translateY(-6px); transition: all .2s; }
+@keyframes drop { from { opacity: 0; transform: translateY(-8px); } }

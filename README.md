@@ -10,6 +10,32 @@ Plain HTML, CSS and JavaScript with no build step, talking to copyparty's own HT
 - `ui/` is served as static files. Any path that isn't under `/_ui/` or `/api/` gets `index.html`.
 - `deploy/nginx.conf` is the production nginx config (security headers, strict CSP, the proxy).
 
+## Code layout
+
+Native ES modules and plain CSS files, loaded directly by the browser.
+
+```
+ui/index.html          page shell and the icon sprite
+ui/_ui/app.js          entry point: runs each feature's init
+ui/_ui/core/           no DOM wiring
+  api.js               every copyparty URL and request lives here
+  up2k.js              copyparty's chunked upload protocol
+  state.js             shared state and the event bus (events are listed at the top)
+  dom.js format.js kinds.js paths.js
+ui/_ui/ui/             generic widgets: toast, dialog, menu
+ui/_ui/views/          pure markup for each listing view (list, grid)
+ui/_ui/features/       one module per part of the app, each exporting init*()
+ui/_ui/css/            tokens.css (theme variables), base.css, then one file per area
+```
+
+Conventions:
+
+- Features talk to each other through the event bus in `core/state.js` (for example, a
+  rename emits `"changed"` and navigation reloads), not by reaching into each other's DOM.
+- No inline scripts, `on*=` attributes or `style=` attributes: the CSP forbids them.
+  Use event listeners, and set styles from JS or in CSS.
+- Colours, radii and fonts come from `css/tokens.css`, so both themes stay in step.
+
 ## Development
 
 1. Download `copyparty-sfx.py` from the [copyparty releases](https://github.com/9001/copyparty/releases) into `dev/`.
@@ -22,3 +48,16 @@ Plain HTML, CSS and JavaScript with no build step, talking to copyparty's own HT
    ```
 
 `serve.py` sends the same Content-Security-Policy as `deploy/nginx.conf`, so CSP problems show up locally.
+
+## Tests
+
+An end-to-end Playwright run against the dev servers: sign in, browse, views, viewer,
+selection, upload, rename, new folder, delete, search, theme, keyboard, sign out, mobile.
+It expects a `Photos/Holiday 2026/` folder of images and a `Docs/` folder with a `notes.txt` in `dev/data/`.
+
+```sh
+cd tests
+npm install
+npx playwright install chromium   # or set CHROME=/path/to/chrome
+npm run e2e                       # screenshots land in tests/shots/
+```
