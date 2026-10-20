@@ -42,7 +42,7 @@ function render() {
   const head = state.hits
     ? `<p class="section-label">${list.length}${state.hitsTrunc ? "+" : ""} result${list.length === 1 ? "" : "s"}</p>`
     : "";
-  el.innerHTML = head + VIEWS[state.view](list, { sort: state.sort, pathOf: itemPath });
+  el.innerHTML = head + VIEWS[state.view](list, { sort: state.sort, pathOf: itemPath, bars: !state.hits });
   updateSel();
 }
 

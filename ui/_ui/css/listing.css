@@ -25,6 +25,19 @@
 .row .num, .row .date { color: var(--text-2); font-size: 13px; font-variant-numeric: tabular-nums; }
 .row .num { text-align: right; padding-right: 18px; }
 .row.head .num { padding-right: 18px; justify-content: flex-end; }
+
+/* size bars: each item's size relative to the biggest in the folder */
+.row .size { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.szbar {
+  --fill: color-mix(in srgb, var(--accent) 45%, transparent);
+  appearance: none; display: block; width: 100%; max-width: 76px; height: 3px;
+  border: 0; border-radius: 2px; background: var(--line); overflow: hidden;
+}
+.szbar.dir { --fill: var(--accent); }
+.szbar::-webkit-meter-bar { background: var(--line); border: 0; border-radius: 2px; height: 3px; }
+.szbar::-webkit-meter-optimum-value { background: var(--fill); border-radius: 2px; }
+.szbar::-moz-meter-bar { background: var(--fill); border-radius: 2px; }
+
 .row .more { opacity: 0; transition: opacity .12s; }
 .row:hover .more, .row .more.open { opacity: 1; }
 

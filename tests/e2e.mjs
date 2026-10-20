@@ -84,6 +84,19 @@ await step("light theme", async () => {
   await page.click("text=Photos"); await page.waitForTimeout(800); await shot("12-light");
   await page.click("#theme-btn");
 });
+await step("size bars", async () => {
+  await page.goto(B + "/"); await page.waitForSelector(".row[data-i]");
+  const sizes = await page.$$eval(".row[data-i] .size", (els) => els.map((e) => e.textContent.trim()));
+  if (!sizes.some((s) => /\d (KB|MB|GB)$/.test(s))) throw new Error("no folder sizes: " + sizes);
+  const vals = await page.$$eval(".row[data-i] meter.szbar", (els) => els.map((e) => +e.value));
+  if (!vals.length || Math.max(...vals) !== 1) throw new Error("bars not scaled to the biggest item: " + vals);
+  console.log("   ", sizes.join(" | "));
+  await page.fill("#search", "IMG"); await page.waitForSelector(".section-label");
+  if (await page.$("meter.szbar")) throw new Error("bars shown in search results");
+  await page.fill("#search", ""); await page.waitForSelector(".section-label", { state: "detached" });
+  await page.click('[data-sort="size"]'); await shot("14-size-bars");
+  await page.click('[data-sort="name"]');
+});
 await step("missing folder", async () => {
   const n = errs.length;
   await page.goto(B + "/no-such-folder/");
