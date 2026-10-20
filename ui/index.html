@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="/_ui/css/login.css">
   <link rel="stylesheet" href="/_ui/css/sidebar.css">
   <link rel="stylesheet" href="/_ui/css/listing.css">
+  <link rel="stylesheet" href="/_ui/css/pane.css">
   <link rel="stylesheet" href="/_ui/css/uploads.css">
   <link rel="stylesheet" href="/_ui/css/viewer.css">
   <script type="module" src="/_ui/app.js"></script>
@@ -69,6 +70,7 @@
             <button class="seg-btn" data-view="list" title="List"><svg class="i"><use href="#i-list"/></svg></button>
             <button class="seg-btn" data-view="grid" title="Grid"><svg class="i"><use href="#i-grid"/></svg></button>
           </div>
+          <button class="icon-btn" id="preview-btn" title="Preview pane" aria-controls="pane"><svg class="i"><use href="#i-pane"/></svg></button>
           <button class="btn ghost" id="mkdir-btn" data-perm="write"><svg class="i"><use href="#i-folder-plus"/></svg><span>New folder</span></button>
           <button class="btn primary" id="upload-btn" data-perm="write"><svg class="i"><use href="#i-upload"/></svg><span>Upload</span></button>
           <input type="file" id="file-input" multiple hidden>
@@ -77,6 +79,11 @@
 
       <div class="listing" id="listing"></div>
     </main>
+
+    <aside class="pane" id="pane" aria-label="Preview">
+      <div class="pane-resize" id="pane-resize" title="Drag to resize"></div>
+      <div class="pane-body" id="pane-body" aria-live="polite"></div>
+    </aside>
     </div>
 
     <div class="selbar" id="selbar" hidden>
@@ -129,6 +136,7 @@
       <symbol id="i-folder-open" viewBox="0 0 24 24"><path d="M4 17.5V7.5a2 2 0 0 1 2-2h3.3l2 2.2H17a2 2 0 0 1 2 2V11"/><path d="M4 17.5 6.3 12a1.6 1.6 0 0 1 1.5-1h12.4a.9.9 0 0 1 .8 1.3l-2.3 5.4a1.6 1.6 0 0 1-1.5 1H5.2A1.2 1.2 0 0 1 4 17.5z"/></symbol>
       <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5H15v-6h-6v6H5.5A1.5 1.5 0 0 1 4 19z"/></symbol>
       <symbol id="i-sidebar" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15M6 8.5h1M6 11.5h1"/></symbol>
+      <symbol id="i-pane" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M14.5 4.5v15M17 8.5h.5M17 11.5h.5"/></symbol>
       <symbol id="i-collapse" viewBox="0 0 24 24"><rect x="4.5" y="4.5" width="15" height="15" rx="3"/><path d="M8.5 12h7"/></symbol>
       <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3.5H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-10zM14 3.5v5h5"/></symbol>
       <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="m20.5 16-5-5-9 8.5"/></symbol>

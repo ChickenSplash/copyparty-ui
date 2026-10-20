@@ -18,6 +18,19 @@ export function openItem(it, siblings) {
   preview(it, siblings);
 }
 
+// The item shown in the preview pane; null shows the current folder instead.
+export function setActive(it, siblings = items(), opts) {
+  state.active = it ? { it, path: itemPath(it), siblings, cwd: state.cwd } : null;
+  emit("active", opts);
+}
+
+// A single click: previews a file in the pane when that's showing, otherwise
+// opens it. Folders always open.
+export function clickItem(it, siblings) {
+  if (it.dir || !state.paneOpen) return openItem(it, siblings);
+  setActive(it, siblings);
+}
+
 // Entries for an item's "more" menu.
 export function itemMenu(it, siblings) {
   const path = itemPath(it);
@@ -32,7 +45,7 @@ export function itemMenu(it, siblings) {
   return m;
 }
 
-async function copyLink(path, isDir) {
+export async function copyLink(path, isDir) {
   const url = location.origin + (isDir ? path : cp.fileUrl(path));
   try { await navigator.clipboard.writeText(url); toast("Link copied"); } catch { toast(url, "ok", 6000); }
 }

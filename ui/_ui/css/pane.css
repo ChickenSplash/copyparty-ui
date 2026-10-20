@@ -1,0 +1,78 @@
+/* Preview pane on the right. */
+.pane {
+  position: sticky; top: 60px; z-index: 10;
+  width: var(--pane-w, 340px); flex: none;
+  height: calc(100vh - 60px); height: calc(100dvh - 60px);
+  display: flex; flex-direction: column;
+  border-left: 1px solid var(--line);
+  background: var(--bg);
+}
+.preview-off .pane { display: none; }
+#preview-btn[aria-pressed="true"] { color: var(--accent-2); background: var(--accent-soft); }
+@media (max-width: 1099px) {
+  .pane, #preview-btn { display: none; }
+}
+
+.pane-body {
+  flex: 1; overflow: auto; padding: 22px 20px 32px;
+  scrollbar-width: thin; scrollbar-color: var(--line-2) transparent;
+}
+.pane-resize { position: absolute; top: 0; left: -3px; bottom: 0; width: 6px; z-index: 1; cursor: col-resize; outline: none; }
+.pane-resize:hover, .pane-resize:focus-visible, .resizing .pane-resize {
+  background: linear-gradient(var(--accent), var(--accent)) no-repeat center / 2px 100%;
+}
+
+/* the preview itself */
+.pv-media {
+  position: relative; aspect-ratio: 4 / 3; overflow: hidden;
+  display: grid; place-items: center;
+  border-radius: var(--radius); border: 1px solid var(--line);
+  background: var(--surface-2); color: var(--text-3);
+}
+.pv-media[data-act] { cursor: zoom-in; }
+.pv-media.k-dir[data-act] { cursor: pointer; }
+.pv-media > .i { width: 54px; height: 54px; stroke-width: 1.2; }
+.pv-media.k-dir, .pv-folder { color: var(--accent-2); background: linear-gradient(160deg, var(--accent-soft), var(--surface-2)); }
+.pv-folder { aspect-ratio: auto; height: 120px; }
+.pv-media.k-image { color: var(--k-image); } .pv-media.k-video { color: var(--k-video); } .pv-media.k-audio { color: var(--k-audio); }
+.pv-media.k-pdf { color: var(--k-pdf); } .pv-media.k-archive { color: var(--k-archive); }
+.pv-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: var(--surface-2); }
+.pv-media video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; }
+.pv-media audio { position: absolute; left: 12px; right: 12px; bottom: 12px; width: calc(100% - 24px); height: 36px; }
+
+.pane .pv-text {
+  margin: 0; max-height: 420px; overflow: auto;
+  padding: 12px 14px; border-radius: var(--radius-sm);
+  background: var(--surface); border: 1px solid var(--line);
+  font: 12px/1.55 var(--mono); color: var(--text-2);
+  white-space: pre-wrap; word-break: break-word;
+}
+.pane .pv-text:empty::before { content: "Loading…"; color: var(--text-3); }
+
+.pv-name { margin: 18px 0 2px; font-size: 16px; font-weight: 620; letter-spacing: -0.01em; overflow-wrap: anywhere; }
+.pv-sub { margin: 0; color: var(--text-3); font-size: 12.5px; }
+
+.pv-actions { display: flex; align-items: center; gap: 4px; margin: 16px 0 18px; }
+.pv-actions .btn { flex: 1; justify-content: center; margin-right: 4px; }
+
+.pv-meta {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 9px 16px;
+  margin: 0 0 20px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 13px;
+}
+.pv-sub + .pv-meta { margin-top: 16px; }
+.pv-meta dt { color: var(--text-3); }
+.pv-meta dd { margin: 0; color: var(--text-2); overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.pv-meta a { color: var(--accent-2); }
+.pv-meta a:hover { text-decoration: underline; }
+
+/* largest items, selection list */
+.pv-list { list-style: none; margin: 0 -8px 16px; padding: 0; }
+.pv-list button, .pv-list.static li {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 4px 10px;
+  width: 100%; padding: 7px 8px; border-radius: 8px; text-align: left; font-size: 13px; color: var(--text-2);
+}
+.pv-list button:hover { background: var(--hover); color: var(--text); }
+.pv-list .n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pv-list .s { color: var(--text-3); font-size: 12px; font-variant-numeric: tabular-nums; }
+.pv-list .szbar { grid-column: 2 / -1; max-width: none; }
+.pv-hint { margin: 0; color: var(--text-3); font-size: 12.5px; }

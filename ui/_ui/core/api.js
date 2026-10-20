@@ -63,6 +63,12 @@ export async function readText(path) {
   return (await api(path + "?txt")).text();
 }
 
+// The start of a file as text. A Range request, so a big file isn't downloaded.
+export async function readHead(path, bytes) {
+  const r = await api(path, { headers: { Range: `bytes=0-${bytes - 1}` } });
+  return new TextDecoder().decode((await r.arrayBuffer()).slice(0, bytes));
+}
+
 // Filename search across every readable volume.
 export async function search(q, limit = 250) {
   const term = q.replace(/["\\]/g, "").replace(/\s+/g, "*");

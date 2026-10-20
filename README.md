@@ -24,7 +24,8 @@ ui/_ui/core/           no DOM wiring
   cache.js             folder listings shared by the main view and the tree
   dom.js format.js kinds.js paths.js
 ui/_ui/ui/             generic widgets: toast, dialog, menu, resizer (drag handle for side panels)
-ui/_ui/views/          pure markup for each listing view (list, grid)
+ui/_ui/views/          pure markup: each listing view (list, grid), and preview.js, how each
+                       file type previews (shared by the viewer and the preview pane)
 ui/_ui/features/       one module per part of the app, each exporting init*()
 ui/_ui/css/            tokens.css (theme variables), base.css, then one file per area
 ```
@@ -39,8 +40,9 @@ Conventions:
   File-kind colours are tokens too (`--k-image` and so on).
 - Read folders through `core/cache.js` (`getDir`), not `listDir` directly, so every panel
   shares one fetch. The cache drops whatever a `"changed"` event names.
-- Anything that opens a file goes through `openItem(it, siblings)` in `features/actions.js`,
-  so there's one place that decides how files open.
+- Anything that opens a file goes through `features/actions.js`, so there's one place that
+  decides how files open: `clickItem` for a single click (previews in the pane when it's
+  showing), `openItem` to open, `setActive` to change what the pane shows.
 
 ## Development
 
@@ -59,7 +61,9 @@ Conventions:
 
 An end-to-end Playwright run against the dev servers: sign in, browse, views, viewer,
 selection, upload, rename, new folder, delete, search, theme, size bars, the tree (expand,
-open, follow, keyboard, menu), sidebar hide and resize, keyboard, sign out, mobile drawer.
+open, follow, keyboard, menu), sidebar hide and resize, the preview pane (folder summary,
+click/double-click, keyboard, images, selection, rename, switching off, narrow windows),
+keyboard, sign out, mobile drawer.
 It expects a `Photos/Holiday 2026/` folder of images and a `Docs/` folder with a `notes.txt` in `dev/data/`.
 
 ```sh

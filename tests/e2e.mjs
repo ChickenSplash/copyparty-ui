@@ -34,7 +34,7 @@ await step("grid", async () => {
   await page.waitForSelector(".tile"); await page.waitForTimeout(1200); await shot("04-grid");
 });
 await step("viewer", async () => {
-  await page.click(".tile >> nth=0"); await page.waitForSelector("#viewer:not([hidden]) img");
+  await page.dblclick(".tile >> nth=0"); await page.waitForSelector("#viewer:not([hidden]) img");
   await page.waitForTimeout(500); await shot("05-viewer"); await page.keyboard.press("ArrowRight");
   await page.waitForTimeout(300); console.log("   ", await page.textContent("#viewer-meta")); await page.keyboard.press("Escape");
 });
@@ -56,7 +56,7 @@ await step("back to list, upload", async () => {
   console.log("   ", (await page.$$eval("#up-list li", (l) => l.map((x) => x.textContent.trim()))).join(" | "));
 });
 await step("preview text", async () => {
-  await page.click("#listing >> text=hello world.txt"); await page.waitForSelector("#viewer pre:has-text('hello')", { timeout: 4000 });
+  await page.dblclick("#listing >> text=hello world.txt"); await page.waitForSelector("#viewer pre:has-text('hello')", { timeout: 4000 });
   await shot("08-text"); await page.keyboard.press("Escape");
 });
 await step("rename", async () => {
@@ -76,8 +76,8 @@ await step("delete", async () => {
 });
 await step("search", async () => {
   await page.press("body", "/"); await page.keyboard.type("img_204");
-  await page.waitForSelector(".section-label", { timeout: 4000 }); await page.waitForTimeout(500); await shot("11-search");
-  console.log("   ", await page.textContent(".section-label"));
+  await page.waitForSelector("#listing .section-label", { timeout: 4000 }); await page.waitForTimeout(500); await shot("11-search");
+  console.log("   ", await page.textContent("#listing .section-label"));
 });
 await step("light theme", async () => {
   await page.keyboard.press("Escape"); await page.click("#theme-btn"); await page.click('#crumbs a:has-text("Home")');
@@ -91,9 +91,9 @@ await step("size bars", async () => {
   const vals = await page.$$eval(".row[data-i] meter.szbar", (els) => els.map((e) => +e.value));
   if (!vals.length || Math.max(...vals) !== 1) throw new Error("bars not scaled to the biggest item: " + vals);
   console.log("   ", sizes.join(" | "));
-  await page.fill("#search", "IMG"); await page.waitForSelector(".section-label");
-  if (await page.$("meter.szbar")) throw new Error("bars shown in search results");
-  await page.fill("#search", ""); await page.waitForSelector(".section-label", { state: "detached" });
+  await page.fill("#search", "IMG"); await page.waitForSelector("#listing .section-label");
+  if (await page.$("#listing meter.szbar")) throw new Error("bars shown in search results");
+  await page.fill("#search", ""); await page.waitForSelector("#listing .section-label", { state: "detached" });
   await page.click('[data-sort="size"]'); await shot("14-size-bars");
   await page.click('[data-sort="name"]');
 });
@@ -110,7 +110,7 @@ await step("tree: expand, open, follow", async () => {
   await page.waitForSelector('.tnode[data-path="/Photos/Holiday%202026/IMG_2041.jpg"]');
   await shot("15-tree");
   // a file opens in the viewer, stepping through its folder
-  await page.click('.tnode[data-path="/Photos/Holiday%202026/IMG_2042.jpg"]'); await page.waitForSelector("#viewer:not([hidden]) img");
+  await page.dblclick('.tnode[data-path="/Photos/Holiday%202026/IMG_2042.jpg"]'); await page.waitForSelector("#viewer:not([hidden]) img");
   console.log("   ", await page.textContent("#viewer-meta")); await page.keyboard.press("Escape");
   // navigating elsewhere reveals the folder in the tree
   await page.click("#tree-collapse"); await page.waitForSelector('.tnode[data-path="/Photos/"][aria-expanded="false"]');
@@ -154,6 +154,67 @@ await step("sidebar: hide, resize", async () => {
   if ((await page.$eval("#sidebar", (e) => e.offsetWidth)) !== w1) throw new Error("width not remembered");
   await page.dblclick("#sidebar-resize");
   console.log("   ", w0, "->", w1, "-> reset", await page.$eval("#sidebar", (e) => e.offsetWidth));
+});
+await step("pane: folder summary", async () => {
+  await page.goto(B + "/"); await page.waitForSelector("#pane-body .pv-name");
+  console.log("   ", await page.textContent("#pane-body .pv-name"), "·", await page.textContent("#pane-body .pv-sub"));
+  if (!(await page.$$("#pane-body .pv-list button")).length) throw new Error("no largest list");
+  await shot("18-pane-folder");
+});
+await step("pane: click previews, double-click opens", async () => {
+  await page.goto(B + "/Docs/"); await page.waitForSelector('.row:has-text("notes.txt")');
+  await page.click('#listing >> text=notes.txt');
+  await page.waitForSelector("#pane-body .pv-text:has-text('Notes')");
+  if (await page.isVisible("#viewer")) throw new Error("single click opened the viewer");
+  await page.waitForSelector('.row.active:has-text("notes.txt")');
+  await shot("19-pane-text");
+  await page.dblclick('#listing >> text=notes.txt'); await page.waitForSelector("#viewer:not([hidden]) pre");
+  await page.keyboard.press("Escape");
+});
+await step("pane: keyboard", async () => {
+  await page.keyboard.press("ArrowDown"); await page.waitForSelector('#pane-body .pv-name:has-text("random.bin")');
+  await page.waitForSelector('.row.active:has-text("random.bin")');
+  await page.keyboard.press("ArrowUp"); await page.keyboard.press("ArrowUp");
+  await page.waitForSelector('#pane-body .pv-name:has-text("backup.tar.gz")');
+  await page.keyboard.press("Enter"); await page.waitForSelector("#viewer:not([hidden]) .nopreview");
+  await page.keyboard.press("Escape"); await page.waitForSelector("#viewer", { state: "hidden" });
+  await page.keyboard.press("Escape"); await page.waitForSelector('#pane-body .pv-name:has-text("Docs")');
+});
+await step("pane: image, from the tree", async () => {
+  await page.goto(B + "/Photos/Holiday%202026/"); await page.waitForSelector(".tnode.current");
+  if (await page.$('.tnode.current[aria-expanded="false"]')) await page.click(".tnode.current [data-toggle]");
+  await page.waitForSelector('.tnode[data-path="/Photos/Holiday%202026/IMG_2043.jpg"]');
+  await page.click('.tnode[data-path="/Photos/Holiday%202026/IMG_2043.jpg"]');
+  await page.waitForSelector("#pane-body .pv-media img"); await page.waitForSelector('.tnode.active[data-path$="IMG_2043.jpg"]');
+  await page.waitForFunction(() => document.querySelector("#pane-body .pv-media img")?.naturalWidth > 0);
+  await page.waitForTimeout(400); await shot("20-pane-image");
+  await page.click("#pane-body .pv-media"); await page.waitForSelector("#viewer:not([hidden]) img");
+  console.log("   ", await page.textContent("#viewer-meta")); await page.keyboard.press("Escape");
+});
+await step("pane: selection, rename follows", async () => {
+  await page.goto(B + "/Docs/"); await page.waitForSelector('.row:has-text("notes.txt")');
+  await page.click('.row:has-text("notes.txt") [data-check]'); await page.click('.row:has-text("table.csv") [data-check]');
+  await page.waitForSelector('#pane-body .pv-name:has-text("2 selected")'); await shot("21-pane-selection");
+  await page.keyboard.press("Escape");
+  await page.setInputFiles("#file-input", [{ name: "pane test.txt", mimeType: "text/plain", buffer: Buffer.from("pane\n") }]);
+  await page.waitForSelector('.row:has-text("pane test.txt")', { timeout: 8000 });
+  await page.click('#listing >> text=pane test.txt'); await page.waitForSelector('#pane-body .pv-name:has-text("pane test.txt")');
+  await page.click('#pane-body [data-act="more"]'); await page.click("#menu >> text=Rename");
+  await page.fill("#dialog input", "pane renamed.txt"); await page.click('#dialog button[value="ok"]');
+  await page.waitForSelector('#pane-body .pv-name:has-text("Docs")', { timeout: 4000 }); // the old name is gone, so back to the folder
+  await page.click('.row:has-text("pane renamed.txt") [data-check]'); await page.click("#sel-rm"); await page.click('#dialog button[value="ok"]');
+  await page.waitForSelector('.row:has-text("pane renamed.txt")', { state: "detached", timeout: 4000 });
+});
+await step("pane: switch off", async () => {
+  await page.click("#preview-btn"); await page.waitForSelector("#pane", { state: "hidden" });
+  await page.click('#listing >> text=notes.txt'); await page.waitForSelector("#viewer:not([hidden]) pre");
+  await page.keyboard.press("Escape");
+  await page.reload(); await page.waitForSelector(".row[data-i]");
+  if (await page.isVisible("#pane")) throw new Error("switched-off pane came back");
+  await page.click("#preview-btn"); await page.waitForSelector("#pane", { state: "visible" });
+  await page.setViewportSize({ width: 1000, height: 800 }); await page.waitForSelector("#pane", { state: "hidden" });
+  await page.click('#listing >> text=notes.txt'); await page.waitForSelector("#viewer:not([hidden]) pre");
+  await page.keyboard.press("Escape"); await page.setViewportSize({ width: 1440, height: 900 });
 });
 await step("missing folder", async () => {
   const n = errs.length;

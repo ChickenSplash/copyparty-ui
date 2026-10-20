@@ -5,6 +5,7 @@
 //   "dir"           a folder loaded or failed (breadcrumbs, permissions, storage)
 //   "render"        what the listing shows changed (folder, view, sort, search)
 //   "selection"     the selection changed
+//   "active"        the item in the preview pane changed; data { scroll } when the keyboard moved it
 //   "changed"       files were created, renamed or deleted; data is the folders affected
 //   "unauthorized"  the session is gone, so show the sign-in screen
 
@@ -22,6 +23,8 @@ export const state = {
   query: "",
   hits: null,
   hitsTrunc: false,
+  active: null, // { it, path, siblings, cwd }: the item in the preview pane
+  paneOpen: false, // the preview pane is showing (switched on, and the window is wide enough)
 };
 
 const handlers = new Map();

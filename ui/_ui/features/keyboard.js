@@ -5,8 +5,8 @@ import { isDialogOpen } from "../ui/dialog.js";
 import { closeMenu, isMenuOpen } from "../ui/menu.js";
 import { isViewerOpen, closeViewer, stepViewer } from "./viewer.js";
 import { clearSearch } from "./search.js";
-import { selectAll } from "./listing.js";
-import { removeItems } from "./actions.js";
+import { selectAll, stepActive } from "./listing.js";
+import { removeItems, openItem, setActive } from "./actions.js";
 import { navigate } from "./nav.js";
 
 function onKey(e) {
@@ -21,8 +21,21 @@ function onKey(e) {
     if (isMenuOpen()) return closeMenu();
     if (document.activeElement === $("#search")) { $("#search").blur(); return clearSearch(); }
     if (state.sel.size) return clearSelection();
+    if (state.active && state.paneOpen) return setActive(null);
   }
   if (typing || $("#app").hidden) return;
+  // Up/Down/Enter browse the listing through the preview pane, unless focus is
+  // somewhere that uses those keys itself (the pane's media controls, buttons).
+  const ae = document.activeElement;
+  const onPage = ae === document.body || !!ae?.closest("#listing");
+  if (state.paneOpen && onPage && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+    e.preventDefault();
+    return stepActive(e.key === "ArrowDown" ? 1 : -1);
+  }
+  if (e.key === "Enter" && state.paneOpen && state.active && onPage) {
+    e.preventDefault();
+    return openItem(state.active.it, state.active.siblings);
+  }
   if (e.key === "/") { e.preventDefault(); $("#search").focus(); }
   else if ((e.ctrlKey || e.metaKey) && e.key === "a") { e.preventDefault(); selectAll(); }
   else if (e.key === "Delete" && state.sel.size && can("delete")) removeItems([...state.sel]);

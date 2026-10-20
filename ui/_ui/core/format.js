@@ -26,6 +26,9 @@ export function fmtDate(ts) {
   return dtDay.format(d);
 }
 
+const dtFull = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+export const fmtDateLong = (ts) => dtFull.format(new Date(ts * 1000));
+
 export function fmtDur(s) {
   if (!isFinite(s) || s < 0) return "";
   if (s < 60) return Math.ceil(s) + "s";

@@ -10,7 +10,7 @@ import { parentOf } from "../core/paths.js";
 import { state, on } from "../core/state.js";
 import { openMenu } from "../ui/menu.js";
 import { navigate } from "./nav.js";
-import { openItem, itemMenu } from "./actions.js";
+import { openItem, clickItem, itemMenu } from "./actions.js";
 
 const ROOT = "/";
 const meta = new Map(); // path -> item, as in a listing plus its full `path`
@@ -96,11 +96,12 @@ const guides = (level) => `<span class="tguide"></span>`.repeat(level - 1);
 function rowHtml({ it, level, isOpen }) {
   const k = kindOf(it.name, it.dir);
   const cur = it.dir && it.path === state.cwd;
+  const active = state.paneOpen && it.path === state.active?.path;
   const attrs = `role="treeitem" aria-level="${level}"` +
     (it.dir ? ` aria-expanded="${isOpen}"` : "") + (cur ? ` aria-current="page"` : "") +
     ` tabindex="${it.path === focusPath ? 0 : -1}" data-path="${esc(it.path)}"` +
     ` href="${esc(it.dir ? it.path : fileUrl(it.path))}"`;
-  return `<a class="tnode${it.dir ? " dir" : ""}${cur ? " current" : ""}" ${attrs}>${guides(level)}` +
+  return `<a class="tnode${it.dir ? " dir" : ""}${cur ? " current" : ""}${active ? " active" : ""}" ${attrs}>${guides(level)}` +
     `<span class="tchev"${it.dir ? " data-toggle" : ""}>${it.dir ? icon("chev-right") : ""}</span>` +
     `<span class="tic k-${k}">${icon(isOpen ? "folder-open" : ICON[k])}</span>` +
     `<span class="tname" title="${esc(it.name)}">${esc(it.name)}</span>` +
@@ -143,8 +144,9 @@ function focusRow(path) {
 
 /* ---------- interaction ---------- */
 
-function activate(it) {
-  if (!it.dir) return openItem(it, siblings(it));
+// open: Enter, which opens a file; a click only previews it when the pane is showing.
+function activate(it, open = false) {
+  if (!it.dir) return open ? openItem(it, siblings(it)) : clickItem(it, siblings(it));
   if (it.path === state.cwd) return toggle(it.path);
   toggle(it.path, true);
   navigate(it.path);
@@ -162,9 +164,16 @@ function onClick(e) {
   }
   if (e.ctrlKey || e.metaKey || e.shiftKey) return; // let the browser open it in a new tab
   e.preventDefault();
+  if (e.detail > 1) return; // see onDblClick
   focusPath = it.path;
   if (e.target.closest("[data-toggle]")) toggle(it.path);
   else activate(it);
+}
+
+function onDblClick(e) {
+  const row = e.target.closest(".tnode[data-path]");
+  const it = row && meta.get(row.dataset.path);
+  if (it && !it.dir && state.paneOpen && !e.target.closest("[data-more]")) openItem(it, siblings(it));
 }
 
 function onContextMenu(e) {
@@ -198,7 +207,7 @@ function onKey(e) {
       if (isOpen) toggle(path, false);
       else if (parentOf(path) !== ROOT) to = parentOf(path);
       break;
-    case "Enter": activate(it); break;
+    case "Enter": activate(it, true); break;
     case " ": it.dir ? toggle(path) : activate(it); break;
     default: return;
   }
@@ -229,6 +238,7 @@ function onChanged(paths = []) {
 export function initTree() {
   const t = tree();
   t.addEventListener("click", onClick);
+  t.addEventListener("dblclick", onDblClick);
   t.addEventListener("contextmenu", onContextMenu);
   t.addEventListener("keydown", onKey);
   $("#tree-collapse").onclick = () => {
@@ -238,6 +248,7 @@ export function initTree() {
   };
   on("dir", onDir);
   on("changed", onChanged);
+  on("active", schedule);
   on("unauthorized", () => {
     meta.clear();
     kids.clear();

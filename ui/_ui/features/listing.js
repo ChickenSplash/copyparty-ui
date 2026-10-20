@@ -2,7 +2,7 @@
 import { $, $$, esc, icon } from "../core/dom.js";
 import { state, on, emit, items, itemPath, can } from "../core/state.js";
 import { openMenu } from "../ui/menu.js";
-import { openItem, itemMenu } from "./actions.js";
+import { openItem, clickItem, itemMenu, setActive } from "./actions.js";
 import { renderList } from "../views/list.js";
 import { renderGrid } from "../views/grid.js";
 
@@ -48,7 +48,12 @@ function render() {
 
 function updateSel() {
   const list = items();
-  $$("#listing [data-i]").forEach((el) => el.classList.toggle("sel", state.sel.has(itemPath(list[+el.dataset.i]))));
+  const active = state.paneOpen && state.active?.path;
+  $$("#listing [data-i]").forEach((el) => {
+    const path = itemPath(list[+el.dataset.i]);
+    el.classList.toggle("sel", state.sel.has(path));
+    el.classList.toggle("active", path === active);
+  });
   listing().classList.toggle("has-sel", state.sel.size > 0);
   $("#selbar").hidden = !state.sel.size;
   $("#sel-count").textContent = `${state.sel.size} selected`;
@@ -86,7 +91,30 @@ function onClick(e) {
     return emit("selection");
   }
   e.preventDefault();
-  openItem(it);
+  if (e.detail > 1) return; // the second click of a double-click: see onDblClick
+  clickItem(it);
+}
+
+// With the preview pane showing, a single click previews a file and a double-click opens it.
+function onDblClick(e) {
+  const el = e.target.closest("[data-i]");
+  if (!el || !state.paneOpen || state.sel.size || e.target.closest("[data-check], [data-more]")) return;
+  const it = items()[+el.dataset.i];
+  if (!it.dir) openItem(it);
+}
+
+// Move the preview to the next (n = 1) or previous (n = -1) item in the listing.
+export function stepActive(n) {
+  const list = items();
+  if (!list.length) return;
+  const i = state.active ? list.findIndex((x) => itemPath(x) === state.active.path) : -1;
+  const j = i < 0 ? (n > 0 ? 0 : list.length - 1) : Math.min(list.length - 1, Math.max(0, i + n));
+  setActive(list[j], list, { scroll: true });
+}
+
+function onActive(opts) {
+  updateSel();
+  if (opts?.scroll) $("#listing .active")?.scrollIntoView({ block: "nearest" });
 }
 
 export function selectAll() {
@@ -98,7 +126,9 @@ export function initListing() {
   on("loading", () => { if (!listing().children.length) listing().innerHTML = skeleton(); });
   on("render", render);
   on("selection", updateSel);
+  on("active", onActive);
   listing().addEventListener("click", onClick);
+  listing().addEventListener("dblclick", onDblClick);
 
   $$(".seg-btn").forEach((b) => (b.onclick = () => {
     state.view = b.dataset.view;

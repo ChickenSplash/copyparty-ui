@@ -25,5 +25,7 @@ export function kindOf(name, isDir) {
 // Sprite icon for each kind.
 export const ICON = { dir: "folder", image: "image", video: "video", audio: "audio", pdf: "pdf", code: "code", text: "text", archive: "archive", file: "file" };
 
+export const KIND_LABEL = { dir: "Folder", image: "Image", video: "Video", audio: "Audio", pdf: "PDF", code: "Code", text: "Text", archive: "Archive", file: "File" };
+
 export const hasThumb = (name) => THUMB.has(extOf(name));
 export const isImage = (name) => IMG.has(extOf(name));
