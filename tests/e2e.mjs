@@ -216,6 +216,53 @@ await step("pane: switch off", async () => {
   await page.click('#listing >> text=notes.txt'); await page.waitForSelector("#viewer:not([hidden]) pre");
   await page.keyboard.press("Escape"); await page.setViewportSize({ width: 1440, height: 900 });
 });
+// Folder sizes from the du plugin vs crawling ?ls. Needs dev/cp.conf's on404
+// plugin and its /Backups volume; a dot-folder there (for example
+// Backups/Vault/.obsidian/) checks that hidden folders stay hidden.
+const usage = () => page.evaluate(async () => {
+  const { getUsage, findNode, lineage } = await import("/_ui/core/usage.js");
+  const { emit } = await import("/_ui/core/state.js");
+  const flat = (n) => [[n.path, n.sz, n.n, n.own], ...n.dirs.flatMap(flat)];
+  const a = await getUsage({ fresh: true }), b = await getUsage();
+  emit("changed", ["/Docs/"]);
+  const c = await getUsage();
+  const node = findNode(a.root, "/Photos/Holiday 2026/") || {};
+  return {
+    source: a.source, cached: a === b, refetched: c !== a, rows: flat(a.root),
+    found: node === findNode(a.root, "/Photos/Holiday%202026/") && lineage(node).map((x) => x.name).join("/"),
+    missing: findNode(a.root, "/nope/"),
+  };
+});
+let viaIndex;
+await step("usage: from the index", async () => {
+  // copyparty (1.20.26) forgets to add a moved file back to its folder totals,
+  // so the renames above leave them short until a rescan puts them right.
+  await page.request.get(B + "/api/?scan");
+  await page.waitForTimeout(1500);
+  viaIndex = await usage();
+  const { source, cached, refetched, rows, found, missing } = viaIndex;
+  if (source !== "index") throw new Error("source " + source);
+  if (!cached || !refetched) throw new Error(`cached ${cached}, refetched after change ${refetched}`);
+  if (found !== "/Photos/Holiday 2026" || missing !== null) throw new Error(`findNode: ${found}, ${missing}`);
+  if (rows.some(([p]) => p.includes("/."))) throw new Error("dot-folder listed");
+  if (!rows.some(([p]) => p.startsWith("/Backups/"))) throw new Error("/Backups volume not merged");
+  for (const [p, sz, , own] of rows) if (own < 0 || own > sz) throw new Error("bad own size at " + p);
+  console.log(`    ${rows.length} folders, ${rows[0][1]} bytes, ${rows[0][2]} files`);
+});
+await step("usage: crawl fallback agrees", async () => {
+  const before = errs.length;
+  await page.route("**/api/_du.json", (r) => r.fulfill({ status: 503, body: "off" }));
+  const viaCrawl = await usage();
+  await page.unroute("**/api/_du.json");
+  errs.splice(before); // the forced 503s
+  if (viaCrawl.source !== "crawl") throw new Error("source " + viaCrawl.source);
+  const idx = new Map(viaIndex.rows.map(([p, sz, n]) => [p, [sz, n]]));
+  if (viaCrawl.rows.length !== idx.size) throw new Error(`${viaCrawl.rows.length} vs ${idx.size} folders`);
+  // The crawl can't see dot-folders, so it may come up short where there are some.
+  const off = viaCrawl.rows.filter(([p, sz, n]) => !idx.has(p) || idx.get(p)[0] !== sz || idx.get(p)[1] !== n);
+  if (off.some(([p, sz]) => !idx.has(p) || sz > idx.get(p)[0])) throw new Error("crawl differs: " + JSON.stringify(off));
+  console.log(`    agrees on ${idx.size - off.length} of ${idx.size} folders; short on ${off.map((r) => r[0]).join(" ") || "none"}`);
+});
 await step("missing folder", async () => {
   const n = errs.length;
   await page.goto(B + "/no-such-folder/");

@@ -59,6 +59,15 @@ export async function listDir(path) {
   };
 }
 
+// Every folder's recursive size and file count in one request, from the du
+// plugin (deploy/plugins/du.py). Rows are [path, bytes, files]; paths are plain
+// text relative to the root, "" being the root. Fails if the plugin isn't loaded.
+export async function folderSizes() {
+  const d = await (await api("/_du.json")).json();
+  if (d.v !== 1) throw new Error("Unknown _du.json version " + d.v);
+  return d.dirs;
+}
+
 export async function readText(path) {
   return (await api(path + "?txt")).text();
 }

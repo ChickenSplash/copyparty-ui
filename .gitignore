@@ -3,6 +3,7 @@ dev/copyparty-sfx.py
 # dev runtime state and local test files
 dev/hist/
 dev/data/
+dev/data-backups/
 *.log
 node_modules/
 tests/shots/
