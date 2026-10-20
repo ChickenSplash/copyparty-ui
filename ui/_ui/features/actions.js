@@ -9,18 +9,20 @@ import { toast } from "../ui/toast.js";
 import { navigate } from "./nav.js";
 import { openViewer } from "./viewer.js";
 
-const preview = (it) => openViewer(it, items().filter((x) => !x.dir));
+// siblings: the list the item came from (the viewer steps through its files);
+// the main listing when not given.
+const preview = (it, siblings = items()) => openViewer(it, siblings.filter((x) => !x.dir));
 
-export function openItem(it) {
+export function openItem(it, siblings) {
   if (it.dir) return navigate(itemPath(it));
-  preview(it);
+  preview(it, siblings);
 }
 
 // Entries for an item's "more" menu.
-export function itemMenu(it) {
+export function itemMenu(it, siblings) {
   const path = itemPath(it);
   const m = [];
-  if (!it.dir) m.push({ icon: "eye", label: "Preview", run: () => preview(it) });
+  if (!it.dir) m.push({ icon: "eye", label: "Preview", run: () => preview(it, siblings) });
   else m.push({ icon: "folder", label: "Open", run: () => navigate(path) });
   if (it.path) m.push({ icon: "folder", label: "Show in folder", run: () => navigate(parentOf(path)) });
   m.push({ icon: "download", label: it.dir ? "Download as zip" : "Download", href: cp.downloadUrl(path, it.dir), download: true });

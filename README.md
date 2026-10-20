@@ -21,8 +21,9 @@ ui/_ui/core/           no DOM wiring
   api.js               every copyparty URL and request lives here
   up2k.js              copyparty's chunked upload protocol
   state.js             shared state and the event bus (events are listed at the top)
+  cache.js             folder listings shared by the main view and the tree
   dom.js format.js kinds.js paths.js
-ui/_ui/ui/             generic widgets: toast, dialog, menu
+ui/_ui/ui/             generic widgets: toast, dialog, menu, resizer (drag handle for side panels)
 ui/_ui/views/          pure markup for each listing view (list, grid)
 ui/_ui/features/       one module per part of the app, each exporting init*()
 ui/_ui/css/            tokens.css (theme variables), base.css, then one file per area
@@ -35,6 +36,11 @@ Conventions:
 - No inline scripts, `on*=` attributes or `style=` attributes: the CSP forbids them.
   Use event listeners, and set styles from JS or in CSS.
 - Colours, radii and fonts come from `css/tokens.css`, so both themes stay in step.
+  File-kind colours are tokens too (`--k-image` and so on).
+- Read folders through `core/cache.js` (`getDir`), not `listDir` directly, so every panel
+  shares one fetch. The cache drops whatever a `"changed"` event names.
+- Anything that opens a file goes through `openItem(it, siblings)` in `features/actions.js`,
+  so there's one place that decides how files open.
 
 ## Development
 
@@ -52,7 +58,8 @@ Conventions:
 ## Tests
 
 An end-to-end Playwright run against the dev servers: sign in, browse, views, viewer,
-selection, upload, rename, new folder, delete, search, theme, keyboard, sign out, mobile.
+selection, upload, rename, new folder, delete, search, theme, size bars, the tree (expand,
+open, follow, keyboard, menu), sidebar hide and resize, keyboard, sign out, mobile drawer.
 It expects a `Photos/Holiday 2026/` folder of images and a `Docs/` folder with a `notes.txt` in `dev/data/`.
 
 ```sh

@@ -1,0 +1,92 @@
+/* Left sidebar and the file tree in it. */
+.shell { flex: 1; display: flex; align-items: flex-start; }
+.shell > .main { min-width: 0; }
+
+.sidebar {
+  position: sticky; top: 60px; z-index: 10;
+  width: var(--sidebar-w, 264px); flex: none;
+  height: calc(100vh - 60px); height: calc(100dvh - 60px);
+  display: flex; flex-direction: column;
+  border-right: 1px solid var(--line);
+  background: var(--bg);
+}
+.sidebar-off .sidebar, .sidebar-scrim { display: none; }
+
+.sidebar-head { display: flex; align-items: center; gap: 4px; padding: 14px 10px 6px 12px; }
+.tree-home {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px;
+  height: 32px; padding: 0 8px; border-radius: 8px;
+  font-weight: 600; font-size: 13.5px; color: var(--text-2);
+  transition: background .12s, color .12s;
+}
+.tree-home .i { width: 16px; height: 16px; color: var(--accent-2); }
+.tree-home:hover { background: var(--hover); color: var(--text); }
+.tree-home.current { background: var(--accent-soft); color: var(--text); }
+.sidebar-head .icon-btn { color: var(--text-3); }
+
+.tree {
+  position: relative; flex: 1; overflow: auto;
+  padding: 2px 10px 24px 12px;
+  overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--line-2) transparent;
+}
+.tnode {
+  display: flex; align-items: center; gap: 4px;
+  height: 30px; padding: 0 3px 0 6px; border-radius: 8px;
+  font-size: 13.5px; color: var(--text-2);
+  white-space: nowrap; user-select: none; outline: none;
+  transition: background .12s, color .12s;
+}
+.tnode[data-path]:hover, .tnode.open { background: var(--hover); color: var(--text); }
+.tnode:focus-visible { box-shadow: inset 0 0 0 1.5px var(--accent); }
+.tnode.current, .tnode.current:hover { background: var(--accent-soft); color: var(--text); font-weight: 550; }
+.tnode.note { color: var(--text-3); font-size: 12.5px; }
+.tnode.note.loading { animation: tree-fade .2s .3s both; } /* only shows if loading is slow */
+@keyframes tree-fade { from { opacity: 0; } }
+
+/* indent guides: one per level, lines join up because rows touch */
+.tguide { align-self: stretch; width: 16px; flex: none; background: linear-gradient(var(--line), var(--line)) no-repeat 7.5px 0 / 1px 100%; }
+.tree:hover .tguide { background-image: linear-gradient(var(--line-2), var(--line-2)); }
+
+.tchev { width: 16px; height: 16px; flex: none; display: grid; place-items: center; border-radius: 4px; color: var(--text-3); }
+.tchev .i { width: 14px; height: 14px; stroke-width: 2; transition: transform .15s; }
+.tchev[data-toggle]:hover { color: var(--text); background: var(--hover); }
+.tnode[aria-expanded="true"] > .tchev .i { transform: rotate(90deg); }
+
+.tic { display: grid; flex: none; color: var(--text-3); }
+.tic .i { width: 16px; height: 16px; }
+.tic.k-dir { color: var(--accent-2); }
+.tic.k-image { color: var(--k-image); } .tic.k-video { color: var(--k-video); } .tic.k-audio { color: var(--k-audio); }
+.tic.k-code { color: var(--k-code); } .tic.k-archive { color: var(--k-archive); } .tic.k-pdf { color: var(--k-pdf); }
+
+.tname { flex: 1; min-width: 0; margin-left: 4px; overflow: hidden; text-overflow: ellipsis; }
+
+.tmore { width: 24px; height: 24px; flex: none; display: grid; place-items: center; border-radius: 6px; color: var(--text-3); opacity: 0; }
+.tmore .i { width: 16px; height: 16px; }
+.tnode:hover .tmore, .tnode:focus-visible .tmore, .tnode.open .tmore, .tmore.open { opacity: 1; }
+.tmore:hover, .tmore.open { background: var(--hover); color: var(--text); }
+
+/* resize handle on the right edge */
+.sidebar-resize { position: absolute; top: 0; right: -3px; bottom: 0; width: 6px; z-index: 1; cursor: col-resize; outline: none; }
+.sidebar-resize:hover, .sidebar-resize:focus-visible, .resizing .sidebar-resize {
+  background: linear-gradient(var(--accent), var(--accent)) no-repeat center / 2px 100%;
+}
+.resizing, .resizing * { cursor: col-resize !important; user-select: none; }
+
+/* narrow screens: a drawer over the page */
+@media (max-width: 760px) {
+  .sidebar, .sidebar-off .sidebar {
+    display: flex; position: fixed; top: 60px; left: 0; bottom: 0; height: auto; z-index: 45;
+    width: min(320px, 86vw);
+    box-shadow: var(--shadow);
+    transform: translateX(-100%); visibility: hidden;
+    transition: transform .22s ease, visibility .22s;
+  }
+  .drawer-open .sidebar { transform: none; visibility: visible; }
+  .drawer-open .sidebar-scrim {
+    display: block; position: fixed; inset: 60px 0 0; z-index: 44;
+    background: rgba(0, 0, 0, .45); backdrop-filter: blur(2px);
+  }
+  .sidebar-resize { display: none; }
+  .tnode { height: 38px; }
+  .tmore { opacity: .5; } /* no hover on touch; long-press also opens the menu */
+}

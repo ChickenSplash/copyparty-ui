@@ -1,6 +1,6 @@
 // Which folder is open, loading it, and the browser history.
 import { $ } from "../core/dom.js";
-import { listDir } from "../core/api.js";
+import { getDir } from "../core/cache.js";
 import { state, emit, on } from "../core/state.js";
 import { clearSearch, runSearch } from "./search.js";
 
@@ -20,7 +20,7 @@ export async function load() {
   emit("loading");
   let d;
   try {
-    d = await listDir(state.cwd);
+    d = await getDir(state.cwd, { fresh: true });
   } catch (err) {
     if (seq !== loadSeq) return;
     if (err.status === 403 || err.status === 401) return emit("unauthorized");

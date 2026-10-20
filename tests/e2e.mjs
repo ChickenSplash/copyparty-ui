@@ -26,11 +26,11 @@ await step("login", async () => {
   await page.waitForSelector("#app:not([hidden]) .row[data-i]", { timeout: 4000 }); await shot("02-root");
 });
 await step("open Photos", async () => {
-  await page.click("text=Photos"); await page.waitForURL("**/Photos/"); await page.waitForSelector(".row[data-i]");
+  await page.click("#listing >> text=Photos"); await page.waitForURL("**/Photos/"); await page.waitForSelector(".row[data-i]");
   await page.waitForTimeout(600); await shot("03-photos-list");
 });
 await step("grid", async () => {
-  await page.click('[data-view="grid"]'); await page.click("text=Holiday 2026"); await page.waitForURL(/Holiday/);
+  await page.click('[data-view="grid"]'); await page.click("#listing >> text=Holiday 2026"); await page.waitForURL(/Holiday/);
   await page.waitForSelector(".tile"); await page.waitForTimeout(1200); await shot("04-grid");
 });
 await step("viewer", async () => {
@@ -44,7 +44,7 @@ await step("select", async () => {
 });
 await step("back to list, upload", async () => {
   await page.click('[data-view="list"]'); await page.click('#crumbs a:has-text("Home")'); await page.waitForURL(B + "/");
-  await page.click("text=Docs"); await page.waitForURL(/Docs/);
+  await page.click("#listing >> text=Docs"); await page.waitForURL(/Docs/);
   const big = Buffer.alloc(3 * 1024 * 1024 + 123); for (let i = 0; i < big.length; i++) big[i] = (i * 7919) & 255;
   await page.setInputFiles("#file-input", [
     { name: "hello world.txt", mimeType: "text/plain", buffer: Buffer.from("hello from the new ui\n") },
@@ -56,7 +56,7 @@ await step("back to list, upload", async () => {
   console.log("   ", (await page.$$eval("#up-list li", (l) => l.map((x) => x.textContent.trim()))).join(" | "));
 });
 await step("preview text", async () => {
-  await page.click("text=hello world.txt"); await page.waitForSelector("#viewer pre:has-text('hello')", { timeout: 4000 });
+  await page.click("#listing >> text=hello world.txt"); await page.waitForSelector("#viewer pre:has-text('hello')", { timeout: 4000 });
   await shot("08-text"); await page.keyboard.press("Escape");
 });
 await step("rename", async () => {
@@ -81,7 +81,7 @@ await step("search", async () => {
 });
 await step("light theme", async () => {
   await page.keyboard.press("Escape"); await page.click("#theme-btn"); await page.click('#crumbs a:has-text("Home")');
-  await page.click("text=Photos"); await page.waitForTimeout(800); await shot("12-light");
+  await page.click("#listing >> text=Photos"); await page.waitForTimeout(800); await shot("12-light");
   await page.click("#theme-btn");
 });
 await step("size bars", async () => {
@@ -96,6 +96,64 @@ await step("size bars", async () => {
   await page.fill("#search", ""); await page.waitForSelector(".section-label", { state: "detached" });
   await page.click('[data-sort="size"]'); await shot("14-size-bars");
   await page.click('[data-sort="name"]');
+});
+await step("tree: expand, open, follow", async () => {
+  await page.goto(B + "/"); await page.waitForSelector('.tnode[data-path="/Photos/"]');
+  await page.click("#tree-collapse"); await page.waitForSelector('.tnode[data-path="/Photos/"][aria-expanded="false"]');
+  const top = await page.$$eval("#tree .tnode[data-path]", (els) => els.map((e) => e.textContent.trim()));
+  console.log("   ", top.join(" | "));
+  await page.click('.tnode[data-path="/Photos/"] [data-toggle]');
+  await page.waitForSelector('.tnode[data-path="/Photos/Holiday%202026/"]');
+  if (page.url() !== B + "/") throw new Error("the chevron navigated");
+  await page.click('.tnode[data-path="/Photos/Holiday%202026/"]'); await page.waitForURL(/Holiday/);
+  await page.waitForSelector('.tnode.current[data-path="/Photos/Holiday%202026/"][aria-expanded="true"]');
+  await page.waitForSelector('.tnode[data-path="/Photos/Holiday%202026/IMG_2041.jpg"]');
+  await shot("15-tree");
+  // a file opens in the viewer, stepping through its folder
+  await page.click('.tnode[data-path="/Photos/Holiday%202026/IMG_2042.jpg"]'); await page.waitForSelector("#viewer:not([hidden]) img");
+  console.log("   ", await page.textContent("#viewer-meta")); await page.keyboard.press("Escape");
+  // navigating elsewhere reveals the folder in the tree
+  await page.click("#tree-collapse"); await page.waitForSelector('.tnode[data-path="/Photos/"][aria-expanded="false"]');
+  await page.goto(B + "/Projects/website/");
+  await page.waitForSelector('.tnode.current[data-path="/Projects/website/"]');
+  await page.waitForSelector('.tnode[data-path="/Projects/"][aria-expanded="true"]');
+});
+await step("tree: keyboard", async () => {
+  await page.focus('.tnode.current');
+  await page.keyboard.press("ArrowRight"); await page.waitForSelector('.tnode.current[aria-expanded="true"]');
+  await page.keyboard.press("ArrowRight"); // into the first child
+  const first = await page.evaluate(() => document.activeElement.dataset.path);
+  if (!first?.startsWith("/Projects/website/")) throw new Error("ArrowRight didn't step in: " + first);
+  await page.keyboard.press("ArrowLeft"); await page.keyboard.press("ArrowLeft"); // to the parent, then collapse it
+  await page.waitForSelector('.tnode.current[aria-expanded="false"]');
+  await page.keyboard.press("ArrowUp"); await page.keyboard.press("Enter"); await page.waitForURL(B + "/Projects/");
+  await page.keyboard.press("Home");
+  console.log("   focus:", await page.evaluate(() => document.activeElement.dataset.path));
+});
+await step("tree: menu and changes", async () => {
+  await page.goto(B + "/Docs/"); await page.waitForSelector('.tnode.current[data-path="/Docs/"]');
+  await page.click('.tnode.current [data-toggle]'); await page.waitForSelector('.tnode[data-path="/Docs/notes.txt"]');
+  await page.click("#mkdir-btn"); await page.fill("#dialog input", "Tree Test"); await page.click('#dialog button[value="ok"]');
+  await page.waitForSelector('.tnode[data-path="/Docs/Tree%20Test/"]', { timeout: 4000 });
+  await page.click('.tnode[data-path="/Docs/Tree%20Test/"]', { button: "right" }); await page.waitForSelector("#menu:not([hidden])");
+  await shot("16-tree-menu");
+  await page.click("#menu >> text=Delete"); await page.click('#dialog button[value="ok"]');
+  await page.waitForSelector('.tnode[data-path="/Docs/Tree%20Test/"]', { state: "detached", timeout: 4000 });
+});
+await step("sidebar: hide, resize", async () => {
+  await page.click("#sidebar-btn"); await page.waitForSelector("#sidebar", { state: "hidden" });
+  await page.reload(); await page.waitForSelector(".row[data-i]");
+  if (await page.isVisible("#sidebar")) throw new Error("hidden sidebar didn't stay hidden");
+  await page.click("#sidebar-btn"); await page.waitForSelector("#sidebar", { state: "visible" });
+  const w0 = (await page.$eval("#sidebar", (e) => e.offsetWidth));
+  const h = await (await page.$("#sidebar-resize")).boundingBox();
+  await page.mouse.move(h.x + 3, h.y + 200); await page.mouse.down(); await page.mouse.move(h.x + 83, h.y + 200, { steps: 5 }); await page.mouse.up();
+  const w1 = (await page.$eval("#sidebar", (e) => e.offsetWidth));
+  if (w1 - w0 < 60) throw new Error(`resize didn't take: ${w0} -> ${w1}`);
+  await page.reload(); await page.waitForSelector("#tree .tnode");
+  if ((await page.$eval("#sidebar", (e) => e.offsetWidth)) !== w1) throw new Error("width not remembered");
+  await page.dblclick("#sidebar-resize");
+  console.log("   ", w0, "->", w1, "-> reset", await page.$eval("#sidebar", (e) => e.offsetWidth));
 });
 await step("missing folder", async () => {
   const n = errs.length;
@@ -124,6 +182,11 @@ await step("logout", async () => {
 });
 await step("mobile", async () => {
   await page.setViewportSize({ width: 390, height: 844 }); await page.waitForTimeout(400); await shot("13-mobile");
+  if (await page.isVisible("#tree")) throw new Error("drawer open by default");
+  await page.click("#sidebar-btn"); await page.waitForSelector(".drawer-open #sidebar"); await page.waitForTimeout(300);
+  await shot("17-mobile-drawer");
+  await page.click('.tnode[data-path="/Docs/"]'); await page.waitForURL(/Docs/);
+  await page.waitForSelector("#app:not(.drawer-open)"); await page.waitForSelector("#tree", { state: "hidden" });
 });
 console.log("console errors:", errs);
 await browser.close();

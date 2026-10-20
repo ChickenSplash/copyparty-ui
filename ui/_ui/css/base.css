@@ -80,8 +80,8 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 }
 .ficon img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: var(--surface-2); }
 .ficon.dir { background: var(--accent-soft); color: var(--accent-2); }
-.ficon.image { color: #f0a5ff; } .ficon.video { color: #ff9d7a; } .ficon.audio { color: #6be0c4; }
-.ficon.code { color: #ffd479; } .ficon.archive { color: #b8a6ff; } .ficon.pdf { color: #ff8a8a; }
+.ficon.image { color: var(--k-image); } .ficon.video { color: var(--k-video); } .ficon.audio { color: var(--k-audio); }
+.ficon.code { color: var(--k-code); } .ficon.archive { color: var(--k-archive); } .ficon.pdf { color: var(--k-pdf); }
 
 .sprite { position: absolute; }
 

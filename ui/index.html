@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="/_ui/css/ui.css">
   <link rel="stylesheet" href="/_ui/css/layout.css">
   <link rel="stylesheet" href="/_ui/css/login.css">
+  <link rel="stylesheet" href="/_ui/css/sidebar.css">
   <link rel="stylesheet" href="/_ui/css/listing.css">
   <link rel="stylesheet" href="/_ui/css/uploads.css">
   <link rel="stylesheet" href="/_ui/css/viewer.css">
@@ -32,6 +33,7 @@
 
   <div id="app" class="app" hidden>
     <header class="topbar">
+      <button class="icon-btn" id="sidebar-btn" title="Toggle sidebar" aria-controls="sidebar"><svg class="i"><use href="#i-sidebar"/></svg></button>
       <a class="brand" href="/" data-nav="/">
         <span class="brand-mark"></span>
         <span class="brand-name" id="brand-name">Files</span>
@@ -47,6 +49,17 @@
         <button class="icon-btn" id="logout-btn" title="Sign out"><svg class="i"><use href="#i-logout"/></svg></button>
       </div>
     </header>
+
+    <div class="shell">
+    <aside class="sidebar" id="sidebar" aria-label="Files">
+      <div class="sidebar-head">
+        <a class="tree-home" id="tree-home" href="/" data-nav="/"><svg class="i"><use href="#i-home"/></svg><span>Home</span></a>
+        <button class="icon-btn sm" id="tree-collapse" title="Collapse all"><svg class="i"><use href="#i-collapse"/></svg></button>
+      </div>
+      <div class="tree" id="tree" role="tree" aria-label="Files"></div>
+      <div class="sidebar-resize" id="sidebar-resize" title="Drag to resize"></div>
+    </aside>
+    <div class="sidebar-scrim" id="sidebar-scrim"></div>
 
     <main class="main" id="main">
       <div class="toolbar">
@@ -64,6 +77,7 @@
 
       <div class="listing" id="listing"></div>
     </main>
+    </div>
 
     <div class="selbar" id="selbar" hidden>
       <span id="sel-count"></span>
@@ -112,6 +126,10 @@
       <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></symbol>
       <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 7.5a2 2 0 0 1 2-2h3.8l2 2.2h7.2a2 2 0 0 1 2 2v7.8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></symbol>
       <symbol id="i-folder-plus" viewBox="0 0 24 24"><path d="M3.5 7.5a2 2 0 0 1 2-2h3.8l2 2.2h7.2a2 2 0 0 1 2 2v7.8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2zM12 11v5M9.5 13.5h5"/></symbol>
+      <symbol id="i-folder-open" viewBox="0 0 24 24"><path d="M4 17.5V7.5a2 2 0 0 1 2-2h3.3l2 2.2H17a2 2 0 0 1 2 2V11"/><path d="M4 17.5 6.3 12a1.6 1.6 0 0 1 1.5-1h12.4a.9.9 0 0 1 .8 1.3l-2.3 5.4a1.6 1.6 0 0 1-1.5 1H5.2A1.2 1.2 0 0 1 4 17.5z"/></symbol>
+      <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5H15v-6h-6v6H5.5A1.5 1.5 0 0 1 4 19z"/></symbol>
+      <symbol id="i-sidebar" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15M6 8.5h1M6 11.5h1"/></symbol>
+      <symbol id="i-collapse" viewBox="0 0 24 24"><rect x="4.5" y="4.5" width="15" height="15" rx="3"/><path d="M8.5 12h7"/></symbol>
       <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3.5H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-10zM14 3.5v5h5"/></symbol>
       <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="m20.5 16-5-5-9 8.5"/></symbol>
       <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10.5 5-3v9l-5-3"/></symbol>
