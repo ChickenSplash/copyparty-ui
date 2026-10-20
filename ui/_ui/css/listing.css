@@ -1,7 +1,7 @@
 /* Folder listing: list and grid views, selection. */
 .table { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
 .row {
-  display: grid; grid-template-columns: 36px minmax(0, 1fr) 110px 150px 44px;
+  display: grid; grid-template-columns: 36px minmax(0, 1fr) 110px 150px 72px;
   align-items: center; gap: 8px;
   min-height: 52px; padding: 0 10px 0 8px;
   border-top: 1px solid var(--line);
@@ -40,6 +40,7 @@
 .szbar::-webkit-meter-optimum-value { background: var(--fill); border-radius: 2px; }
 .szbar::-moz-meter-bar { background: var(--fill); border-radius: 2px; }
 
+.row-end { display: flex; justify-content: flex-end; gap: 2px; }
 .row .more { opacity: 0; transition: opacity .12s; }
 .row:hover .more, .row .more.open { opacity: 1; }
 
@@ -109,4 +110,5 @@
   .row .date { display: none; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
   .check, .row .more, .tile .more { opacity: 1; }
+  .row .usage-btn { display: none; } /* it's in the menu */
 }

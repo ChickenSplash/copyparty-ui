@@ -14,6 +14,7 @@ import { openMenu } from "../ui/menu.js";
 import { makeResizer } from "../ui/resizer.js";
 import { previewHtml, loadText, isTextPreview } from "../views/preview.js";
 import { openItem, itemMenu, copyLink, setActive } from "./actions.js";
+import { openUsage } from "./usage.js";
 
 const wide = matchMedia("(min-width: 1100px)");
 let wanted = localStorage.getItem("preview") !== "off";
@@ -76,6 +77,7 @@ function itemHtml({ it, path }) {
       `<button class="btn primary" data-act="open">${icon(it.dir ? "folder" : "eye")}<span>Open</span></button>` +
       `<a class="icon-btn" href="${esc(downloadUrl(path, it.dir))}" download title="${it.dir ? "Download as zip" : "Download"}">${icon("download")}</a>` +
       `<button class="icon-btn" data-act="link" title="Copy link">${icon("link")}</button>` +
+      (it.dir ? `<button class="icon-btn" data-act="usage" title="Storage usage">${icon("usage")}</button>` : "") +
       `<button class="icon-btn" data-act="more" data-more title="More">${icon("dots")}</button>` +
     `</div>` +
     details([
@@ -95,6 +97,7 @@ function folderHtml(list) {
   return `<div class="pv-media pv-folder k-dir">${icon(state.hits ? "search" : "folder")}</div>` +
     `<h2 class="pv-name">${esc(name)}</h2><p class="pv-sub">${esc(counts)}</p>` +
     details([["Size", list.length ? fmtSize(total(list)) : ""]]) +
+    (state.hits ? "" : `<button class="btn ghost sm pv-usage" data-act="usage">${icon("usage")}<span>Storage usage</span></button>`) +
     largest(list) +
     (list.some((it) => !it.dir) ? `<p class="pv-hint">Click a file to preview it here, double-click to open it. ↑ ↓ to step through.</p>` : "");
 }
@@ -134,6 +137,7 @@ function onClick(e) {
   const b = e.target.closest("[data-act]");
   if (!b || !shown) return;
   const act = b.dataset.act;
+  if (act === "usage") return openUsage(shown.path || state.cwd);
   if (act === "open") {
     stopMedia();
     openItem(shown.it, shown.siblings);

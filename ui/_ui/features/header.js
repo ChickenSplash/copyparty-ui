@@ -20,7 +20,7 @@ function renderCrumbs() {
 function onDir(d) {
   if (d) {
     $("#storage").textContent = d.free ? `${d.free} free` : "";
-    if (d.free) $("#storage").title = `${d.free} free of ${d.total}`;
+    if (d.free) $("#storage").title = `${d.free} free of ${d.total} · storage usage`;
     if (d.server) $("#brand-name").textContent = d.server;
     $$("[data-perm]").forEach((el) => (el.hidden = !can(el.dataset.perm)));
   }

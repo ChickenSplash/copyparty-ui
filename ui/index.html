@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="/_ui/css/pane.css">
   <link rel="stylesheet" href="/_ui/css/uploads.css">
   <link rel="stylesheet" href="/_ui/css/viewer.css">
+  <link rel="stylesheet" href="/_ui/css/usage.css">
   <script type="module" src="/_ui/app.js"></script>
 </head>
 <body>
@@ -45,7 +46,7 @@
         <kbd>/</kbd>
       </label>
       <div class="topbar-end">
-        <span class="storage" id="storage" title="Free space"></span>
+        <button class="storage" id="storage" title="Storage usage"></button>
         <button class="icon-btn" id="theme-btn" title="Toggle theme"><svg class="i"><use href="#i-moon"/></svg></button>
         <button class="icon-btn" id="logout-btn" title="Sign out"><svg class="i"><use href="#i-logout"/></svg></button>
       </div>
@@ -117,6 +118,19 @@
     <button class="viewer-nav next" id="viewer-next" title="Next"><svg class="i"><use href="#i-chev-right"/></svg></button>
   </div>
 
+  <dialog class="usage" id="usage" aria-labelledby="usage-title">
+    <header class="usage-bar">
+      <h2 id="usage-title"><svg class="i"><use href="#i-usage"/></svg>Storage</h2>
+      <nav class="usage-crumbs" id="usage-crumbs" aria-label="Zoom"></nav>
+      <button class="icon-btn" id="usage-close" title="Close"><svg class="i"><use href="#i-x"/></svg></button>
+    </header>
+    <div class="usage-body">
+      <div class="usage-chart" id="usage-chart"></div>
+      <div class="usage-side" id="usage-side" aria-live="polite"></div>
+    </div>
+    <footer class="usage-foot" id="usage-foot"></footer>
+  </dialog>
+
   <div class="menu" id="menu" hidden></div>
   <dialog class="dialog" id="dialog"><form method="dialog" id="dialog-form"></form></dialog>
   <div class="toasts" id="toasts"></div>
@@ -146,6 +160,7 @@
       <symbol id="i-code" viewBox="0 0 24 24"><path d="m8.5 8-4 4 4 4M15.5 8l4 4-4 4M13.5 5.5l-3 13"/></symbol>
       <symbol id="i-archive" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="4.5" rx="1"/><path d="M5 8.5v9.5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5M10 12.5h4"/></symbol>
       <symbol id="i-pdf" viewBox="0 0 24 24"><path d="M14 3.5H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-10zM14 3.5v5h5"/><path d="M8.5 16.5v-4h1.3a1.2 1.2 0 0 1 0 2.4H8.5M13 12.5v4h.8a1.6 1.6 0 0 0 1.6-1.6v-.8a1.6 1.6 0 0 0-1.6-1.6z"/></symbol>
+      <symbol id="i-usage" viewBox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 1 0 8.5 8.5H12z"/><path d="M15 3.9A8.5 8.5 0 0 1 20.1 9H15z"/></symbol>
       <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="5.5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18.5" cy="12" r="1.2"/></symbol>
       <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
       <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>

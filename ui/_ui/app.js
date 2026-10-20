@@ -2,6 +2,7 @@
 //   core/      no DOM wiring: API client, state + events, formatting, file kinds
 //   ui/        generic widgets: toast, dialog, menu
 //   views/     pure markup for each listing view
+//   views/     also sunburst.js, the usage chart (data in, SVG out)
 //   features/  one module per part of the app, each with an init function
 import { initMenu } from "./ui/menu.js";
 import { initTheme } from "./features/theme.js";
@@ -17,6 +18,7 @@ import { initActions } from "./features/actions.js";
 import { initViewer } from "./features/viewer.js";
 import { initUploads } from "./features/upload.js";
 import { initKeyboard } from "./features/keyboard.js";
+import { initUsage } from "./features/usage.js";
 
 initMenu();
 initTheme();
@@ -32,5 +34,6 @@ initActions();
 initViewer();
 initUploads();
 initKeyboard();
+initUsage();
 
 navigate(location.pathname, false);

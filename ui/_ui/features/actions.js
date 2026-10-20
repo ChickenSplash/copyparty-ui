@@ -8,6 +8,7 @@ import { dialog } from "../ui/dialog.js";
 import { toast } from "../ui/toast.js";
 import { navigate } from "./nav.js";
 import { openViewer } from "./viewer.js";
+import { openUsage } from "./usage.js";
 
 // siblings: the list the item came from (the viewer steps through its files);
 // the main listing when not given.
@@ -36,7 +37,7 @@ export function itemMenu(it, siblings) {
   const path = itemPath(it);
   const m = [];
   if (!it.dir) m.push({ icon: "eye", label: "Preview", run: () => preview(it, siblings) });
-  else m.push({ icon: "folder", label: "Open", run: () => navigate(path) });
+  else m.push({ icon: "folder", label: "Open", run: () => navigate(path) }, { icon: "usage", label: "Storage usage", run: () => openUsage(path) });
   if (it.path) m.push({ icon: "folder", label: "Show in folder", run: () => navigate(parentOf(path)) });
   m.push({ icon: "download", label: it.dir ? "Download as zip" : "Download", href: cp.downloadUrl(path, it.dir), download: true });
   m.push({ icon: "link", label: "Copy link", run: () => copyLink(path, it.dir) });

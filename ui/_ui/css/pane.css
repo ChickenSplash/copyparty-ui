@@ -76,3 +76,4 @@
 .pv-list .s { color: var(--text-3); font-size: 12px; font-variant-numeric: tabular-nums; }
 .pv-list .szbar { grid-column: 2 / -1; max-width: none; }
 .pv-hint { margin: 0; color: var(--text-3); font-size: 12.5px; }
+.pv-usage { width: 100%; justify-content: center; margin: -4px 0 22px; }

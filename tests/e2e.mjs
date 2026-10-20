@@ -263,6 +263,50 @@ await step("usage: crawl fallback agrees", async () => {
   if (off.some(([p, sz]) => !idx.has(p) || sz > idx.get(p)[0])) throw new Error("crawl differs: " + JSON.stringify(off));
   console.log(`    agrees on ${idx.size - off.length} of ${idx.size} folders; short on ${off.map((r) => r[0]).join(" ") || "none"}`);
 });
+// The usage sunburst. Arcs are thin rings, so Playwright's hover/click (aimed
+// at the bounding box's centre) can land on another ring: dispatch to them instead.
+const arcEvent = (sel, type) => page.$eval(sel, (el, type) => el.dispatchEvent(
+  type === "pointerover" ? new PointerEvent(type, { bubbles: true }) : new MouseEvent(type, { bubbles: true, detail: type === "dblclick" ? 2 : 1 })), type);
+const centre = () => page.$$eval("#usage-chart text", (t) => t.map((x) => x.textContent).join(" / "));
+await step("usage: opens with the folder highlighted", async () => {
+  await page.goto(B + "/Backups/Pictures/"); await page.waitForSelector('.row:has-text("2024")');
+  await page.hover('.row:has-text("2024")'); await page.click('.row:has-text("2024") [data-usage]');
+  await page.waitForSelector("#usage[open] .sunburst.has-hl");
+  if ((await page.textContent("#usage .us-hl h3")).trim() !== "2024") throw new Error("wrong folder highlighted");
+  if (!(await page.$("#usage .hl-outline")) || !(await page.$("#usage .arc.dim"))) throw new Error("no outline or dimming");
+  if (page.url() !== B + "/Backups/Pictures/") throw new Error("opening it navigated");
+  await page.waitForTimeout(400); await shot("22-usage");
+  console.log("   ", await page.textContent("#usage-crumbs"), "·", await page.$$eval("#usage .arc", (a) => a.length), "arcs ·", await centre());
+});
+await step("usage: hover, zoom, open", async () => {
+  await arcEvent("#usage .arc.hl", "pointerover");
+  if (!(await centre()).startsWith("2024 /")) throw new Error("hover didn't show in the middle: " + (await centre()));
+  await arcEvent("#usage .arc.hl", "click");
+  await page.waitForSelector('#usage-crumbs [aria-current]:has-text("2024")');
+  await page.keyboard.press("Backspace"); await page.waitForSelector('#usage-crumbs [aria-current]:has-text("Pictures")');
+  if (!page.url().endsWith("/Backups/Pictures/")) throw new Error("Backspace navigated the page");
+  await page.click('#usage-crumbs [data-zoom="0"]'); await page.waitForSelector('#usage-crumbs [aria-current]:has-text("Home")');
+  await page.click("#usage [data-core]"); // already at the top: nothing happens
+  await page.click('#usage [data-act="zoom-hl"]'); await page.waitForSelector('#usage-crumbs [aria-current]:has-text("2024")');
+  await page.click('#usage [data-act="open"]'); await page.waitForURL(/\/Backups\/Pictures\/2024\/$/);
+  await page.waitForSelector("#usage", { state: "hidden" });
+  await page.click("#storage"); await page.waitForSelector("#usage[open] .sunburst");
+  await arcEvent("#usage .arc.anc", "dblclick"); await page.waitForURL(B + "/Backups/"); // the first parent slice: Backups, in ring 1
+  await page.waitForSelector("#usage", { state: "hidden" });
+  console.log("    double-click opened", new URL(page.url()).pathname);
+});
+await step("usage: from the tree, pane and top bar", async () => {
+  await page.goto(B + "/"); await page.waitForSelector('.tnode[data-path="/Docs/"]');
+  await page.click('.tnode[data-path="/Docs/"]', { button: "right" }); await page.click("#menu >> text=Storage usage");
+  await page.waitForSelector('#usage[open] .us-hl h3:has-text("Docs")'); await page.keyboard.press("Escape");
+  await page.waitForSelector("#usage", { state: "hidden" });
+  await page.click('#pane-body [data-act="usage"]'); await page.waitForSelector("#usage[open] .sunburst");
+  if (await page.$("#usage .us-hl")) throw new Error("Home shouldn't highlight anything");
+  await page.mouse.click(5, 5); await page.waitForSelector("#usage", { state: "hidden" }); // the backdrop closes it
+  await page.click("#theme-btn"); await page.goto(B + "/Backups/Vault/"); await page.waitForSelector(".row[data-i], .empty");
+  await page.click("#storage"); await page.waitForSelector('#usage[open] .us-hl h3:has-text("Vault")');
+  await page.waitForTimeout(400); await shot("23-usage-light"); await page.keyboard.press("Escape"); await page.click("#theme-btn");
+});
 await step("missing folder", async () => {
   const n = errs.length;
   await page.goto(B + "/no-such-folder/");
@@ -295,6 +339,15 @@ await step("mobile", async () => {
   await shot("17-mobile-drawer");
   await page.click('.tnode[data-path="/Docs/"]'); await page.waitForURL(/Docs/);
   await page.waitForSelector("#app:not(.drawer-open)"); await page.waitForSelector("#tree", { state: "hidden" });
+});
+await step("mobile usage", async () => {
+  await page.goto(B + "/Backups/"); await page.waitForSelector('.row:has-text("Pictures")');
+  await page.click('.row:has-text("Pictures") [data-more]'); await page.click("#menu >> text=Storage usage");
+  await page.waitForSelector('#usage[open] .us-hl h3:has-text("Pictures")'); await page.waitForTimeout(400);
+  await shot("24-usage-mobile");
+  const w = await page.$eval("#usage", (d) => d.offsetWidth);
+  if (w !== 390) throw new Error("not full width on mobile: " + w);
+  await page.click("#usage-close"); await page.waitForSelector("#usage", { state: "hidden" });
 });
 console.log("console errors:", errs);
 await browser.close();

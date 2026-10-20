@@ -8,9 +8,11 @@ import { clearSearch } from "./search.js";
 import { selectAll, stepActive } from "./listing.js";
 import { removeItems, openItem, setActive } from "./actions.js";
 import { navigate } from "./nav.js";
+import { isUsageOpen } from "./usage.js";
 
 function onKey(e) {
   const typing = /^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName) || isDialogOpen();
+  if (isUsageOpen()) return; // it handles its own keys
   if (isViewerOpen()) {
     if (e.key === "Escape") closeViewer();
     else if (e.key === "ArrowLeft") stepViewer(-1);

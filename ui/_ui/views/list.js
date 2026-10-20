@@ -44,7 +44,7 @@ export function renderList(list, { sort, pathOf, bars }) {
         </a>
         ${sizeCell(it, max, total)}
         <span class="date">${fmtDate(it.ts)}</span>
-        <button class="icon-btn sm more" data-more title="More">${icon("dots")}</button>
+        <span class="row-end">${it.dir ? `<button class="icon-btn sm more usage-btn" data-usage title="Storage usage">${icon("usage")}</button>` : ""}<button class="icon-btn sm more" data-more title="More">${icon("dots")}</button></span>
       </div>`;
     }).join("") + `</div>`;
 }

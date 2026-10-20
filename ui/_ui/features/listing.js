@@ -3,6 +3,7 @@ import { $, $$, esc, icon } from "../core/dom.js";
 import { state, on, emit, items, itemPath, can } from "../core/state.js";
 import { openMenu } from "../ui/menu.js";
 import { openItem, clickItem, itemMenu, setActive } from "./actions.js";
+import { openUsage } from "./usage.js";
 import { renderList } from "../views/list.js";
 import { renderGrid } from "../views/grid.js";
 
@@ -73,6 +74,10 @@ function onClick(e) {
   const it = items()[i];
   const path = itemPath(it);
 
+  if (e.target.closest("[data-usage]")) {
+    e.preventDefault();
+    return openUsage(path);
+  }
   if (e.target.closest("[data-more]")) {
     e.preventDefault();
     e.stopPropagation();
@@ -98,7 +103,7 @@ function onClick(e) {
 // With the preview pane showing, a single click previews a file and a double-click opens it.
 function onDblClick(e) {
   const el = e.target.closest("[data-i]");
-  if (!el || !state.paneOpen || state.sel.size || e.target.closest("[data-check], [data-more]")) return;
+  if (!el || !state.paneOpen || state.sel.size || e.target.closest("[data-check], [data-more], [data-usage]")) return;
   const it = items()[+el.dataset.i];
   if (!it.dir) openItem(it);
 }

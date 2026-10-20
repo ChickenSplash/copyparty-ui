@@ -29,8 +29,9 @@ ui/_ui/core/           no DOM wiring
   usage.js             folder sizes for the whole store as a tree (du plugin, or a crawl)
   dom.js format.js kinds.js paths.js
 ui/_ui/ui/             generic widgets: toast, dialog, menu, resizer (drag handle for side panels)
-ui/_ui/views/          pure markup: each listing view (list, grid), and preview.js, how each
-                       file type previews (shared by the viewer and the preview pane)
+ui/_ui/views/          pure markup: each listing view (list, grid), preview.js, how each
+                       file type previews (shared by the viewer and the preview pane), and
+                       sunburst.js, the usage chart's layout and SVG (data in, markup out)
 ui/_ui/features/       one module per part of the app, each exporting init*()
 ui/_ui/css/            tokens.css (theme variables), base.css, then one file per area
 ```
@@ -69,7 +70,8 @@ An end-to-end Playwright run against the dev servers: sign in, browse, views, vi
 selection, upload, rename, new folder, delete, search, theme, size bars, the tree (expand,
 open, follow, keyboard, menu), sidebar hide and resize, the preview pane (folder summary,
 click/double-click, keyboard, images, selection, rename, switching off, narrow windows),
-keyboard, folder sizes (du plugin vs the crawl fallback), sign out, mobile drawer.
+keyboard, folder sizes (du plugin vs the crawl fallback), the usage sunburst (highlight,
+hover, zoom, open, every way in), sign out, mobile drawer and usage view.
 It expects a `Photos/Holiday 2026/` folder of images and a `Docs/` folder with a `notes.txt` in `dev/data/`.
 
 ```sh
