@@ -1,9 +1,10 @@
 // What you can do to files and folders: open, download, link, rename, delete, new folder.
 import { $ } from "../core/dom.js";
 import * as cp from "../core/api.js";
+import { getDir } from "../core/cache.js";
 import { dec, encSeg } from "../core/format.js";
 import { parentOf, commonParent } from "../core/paths.js";
-import { state, emit, items, itemPath, can, clearSelection } from "../core/state.js";
+import { state, on, emit, items, itemPath, clearSelection } from "../core/state.js";
 import { dialog } from "../ui/dialog.js";
 import { toast } from "../ui/toast.js";
 import { navigate } from "./nav.js";
@@ -32,17 +33,31 @@ export function clickItem(it, siblings) {
   setActive(it, siblings);
 }
 
+// What you may do to the item at `path`. copyparty gives permissions per folder,
+// and a subfolder can be a section of its own with other rules (the read-only
+// /Backups inside Home), so a folder's own listing decides for the folder, and
+// its parent's for a file. Listings are cached, so this is usually instant.
+// Nothing is allowed if the listing fails.
+export async function permsAt(path) {
+  const dir = path.endsWith("/") ? path : parentOf(path);
+  if (dir === state.cwd) return state.perms;
+  try { return (await getDir(dir)).perms; } catch { return []; }
+}
+
+const canAll = async (paths, perm) => (await Promise.all(paths.map(permsAt))).every((p) => p.includes(perm));
+
 // Entries for an item's "more" menu.
-export function itemMenu(it, siblings) {
+export async function itemMenu(it, siblings) {
   const path = itemPath(it);
+  const perms = await permsAt(path);
   const m = [];
   if (!it.dir) m.push({ icon: "eye", label: "Preview", run: () => preview(it, siblings) });
   else m.push({ icon: "folder", label: "Open", run: () => navigate(path) }, { icon: "usage", label: "Storage usage", run: () => openUsage(path) });
   if (it.path) m.push({ icon: "folder", label: "Show in folder", run: () => navigate(parentOf(path)) });
   m.push({ icon: "download", label: it.dir ? "Download as zip" : "Download", href: cp.downloadUrl(path, it.dir), download: true });
   m.push({ icon: "link", label: "Copy link", run: () => copyLink(path, it.dir) });
-  if (can("move")) m.push("-", { icon: "pencil", label: "Rename", run: () => rename(it) });
-  if (can("delete")) m.push({ icon: "trash", label: "Delete", danger: true, run: () => removeItems([path]) });
+  if (perms.includes("move")) m.push("-", { icon: "pencil", label: "Rename", run: () => rename(it) });
+  if (perms.includes("delete")) m.push({ icon: "trash", label: "Delete", danger: true, run: () => removeItems([path]) });
   return m;
 }
 
@@ -94,6 +109,19 @@ async function newFolder() {
   }
 }
 
+export async function deleteSelection() {
+  const paths = [...state.sel];
+  if (paths.length && (await canAll(paths, "delete"))) removeItems(paths);
+}
+
+// The selection bar's Delete shows only when every selected item can be deleted.
+let selSeq = 0;
+async function syncSelDelete() {
+  const n = ++selSeq;
+  const ok = state.sel.size > 0 && (await canAll([...state.sel], "delete"));
+  if (n === selSeq) $("#sel-rm").hidden = !ok;
+}
+
 function downloadSelection() {
   const paths = [...state.sel];
   if (paths.length === 1 && !paths[0].endsWith("/")) {
@@ -106,6 +134,8 @@ function downloadSelection() {
 export function initActions() {
   $("#mkdir-btn").onclick = newFolder;
   $("#sel-clear").onclick = clearSelection;
-  $("#sel-rm").onclick = () => removeItems([...state.sel]);
+  $("#sel-rm").onclick = deleteSelection;
   $("#sel-dl").onclick = downloadSelection;
+  on("selection", syncSelDelete);
+  on("dir", syncSelDelete);
 }

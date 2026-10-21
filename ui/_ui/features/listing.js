@@ -60,7 +60,7 @@ function updateSel() {
   $("#sel-count").textContent = `${state.sel.size} selected`;
 }
 
-function onClick(e) {
+async function onClick(e) {
   const sortBtn = e.target.closest("[data-sort]");
   if (sortBtn) {
     const k = sortBtn.dataset.sort;
@@ -81,7 +81,7 @@ function onClick(e) {
   if (e.target.closest("[data-more]")) {
     e.preventDefault();
     e.stopPropagation();
-    return openMenu(e.target.closest("[data-more]"), itemMenu(it));
+    return openMenu(e.target.closest("[data-more]"), await itemMenu(it));
   }
   // With a selection active, a click anywhere but the name toggles selection.
   if (e.target.closest("[data-check]") || e.ctrlKey || e.metaKey || e.shiftKey || (state.sel.size && !e.target.closest("[data-open]"))) {

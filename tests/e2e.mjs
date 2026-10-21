@@ -12,7 +12,7 @@ const errs = [];
 page.on("console", (m) => m.type() === "error" && errs.push(m.text()));
 page.on("pageerror", (e) => errs.push("PAGEERR " + e.message));
 const shot = (n) => page.screenshot({ path: `${out}/${n}.png` });
-const step = async (n, fn) => { try { await fn(); console.log("ok  ", n); } catch (e) { console.log("FAIL", n, e.message.split("\n")[0]); } };
+const step = async (n, fn) => { try { await fn(); console.log("ok  ", n); } catch (e) { console.log("FAIL", n, e.message.split("\n")[0]); if (process.env.DEBUG) console.log(e.stack.split("\n").find((l) => l.includes("e2e.mjs"))); } };
 
 await page.goto(B + "/");
 await step("login screen", async () => { await page.waitForSelector("#login:not([hidden])", { timeout: 4000 }); await shot("01-login"); });
@@ -306,6 +306,36 @@ await step("usage: from the tree, pane and top bar", async () => {
   await page.click("#theme-btn"); await page.goto(B + "/Backups/Vault/"); await page.waitForSelector(".row[data-i], .empty");
   await page.click("#storage"); await page.waitForSelector('#usage[open] .us-hl h3:has-text("Vault")');
   await page.waitForTimeout(400); await shot("23-usage-light"); await page.keyboard.press("Escape"); await page.click("#theme-btn");
+});
+// /Backups is its own read-only section inside Home, so actions must follow
+// each item's own permissions, not the folder being viewed.
+const menuLabels = async (row) => {
+  await page.hover(row); await page.click(`${row} >> [data-more]`); await page.waitForSelector("#menu:not([hidden])");
+  const l = await page.$$eval("#menu button, #menu a", (els) => els.map((e) => e.textContent.trim()));
+  await page.keyboard.press("Escape"); return l;
+};
+await step("permissions per item", async () => {
+  await page.goto(B + "/"); await page.waitForSelector('.row:has-text("Backups")');
+  const ro = await menuLabels('.row:has-text("Backups")'), rw = await menuLabels('.row:has-text("Docs")');
+  if (ro.includes("Rename") || ro.includes("Delete")) throw new Error("read-only Backups offers " + ro);
+  if (!rw.includes("Rename") || !rw.includes("Delete")) throw new Error("Docs lost its actions: " + rw);
+  await page.click('.row:has-text("Backups") [data-check]'); await page.waitForSelector("#selbar:not([hidden])");
+  await page.waitForTimeout(150);
+  if (await page.isVisible("#sel-rm")) throw new Error("Delete offered for Backups");
+  await page.keyboard.press("Delete"); await page.waitForTimeout(200);
+  if (await page.$("#dialog[open]")) throw new Error("the Delete key asked to delete Backups");
+  await page.click('.row:has-text("Docs") [data-check]'); await page.waitForTimeout(150);
+  if (await page.isVisible("#sel-rm")) throw new Error("Delete offered for a mix including Backups");
+  await page.click('.row:has-text("Backups") [data-check]'); await page.waitForSelector("#sel-rm", { state: "visible" });
+  await page.keyboard.press("Escape");
+  await page.click('.tnode[data-path="/Backups/"]', { button: "right" }); await page.waitForSelector("#menu:not([hidden])");
+  if ((await page.textContent("#menu")).includes("Delete")) throw new Error("tree menu offers Delete on Backups");
+  await page.keyboard.press("Escape"); await page.mouse.click(5, 300);
+  await page.fill("#search", "IMG_2024"); await page.waitForSelector("#listing .section-label");
+  const hit = await menuLabels(".row[data-i] >> nth=0");
+  if (hit.includes("Delete") || hit.includes("Rename")) throw new Error("search hit in Backups offers " + hit);
+  await page.fill("#search", "");
+  console.log("    Backups:", ro.join(", "), "· Docs:", rw.join(", "));
 });
 await step("missing folder", async () => {
   const n = errs.length;

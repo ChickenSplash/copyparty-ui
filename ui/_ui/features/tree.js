@@ -152,7 +152,7 @@ function activate(it, open = false) {
   navigate(it.path);
 }
 
-function onClick(e) {
+async function onClick(e) {
   const row = e.target.closest(".tnode[data-path]");
   if (!row) return;
   const it = meta.get(row.dataset.path);
@@ -160,7 +160,7 @@ function onClick(e) {
   if (more) {
     e.preventDefault();
     e.stopPropagation();
-    return openMenu(more, itemMenu(it, siblings(it)));
+    return openMenu(more, await itemMenu(it, siblings(it)));
   }
   if (e.ctrlKey || e.metaKey || e.shiftKey) return; // let the browser open it in a new tab
   e.preventDefault();
@@ -176,12 +176,12 @@ function onDblClick(e) {
   if (it && !it.dir && state.paneOpen && !e.target.closest("[data-more]")) openItem(it, siblings(it));
 }
 
-function onContextMenu(e) {
+async function onContextMenu(e) {
   const row = e.target.closest(".tnode[data-path]");
   if (!row) return;
   e.preventDefault();
   const it = meta.get(row.dataset.path);
-  openMenu(row, itemMenu(it, siblings(it)));
+  openMenu(row, await itemMenu(it, siblings(it)));
 }
 
 // Arrow keys as in a file manager's tree: up/down move, right expands or steps

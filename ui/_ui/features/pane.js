@@ -133,7 +133,7 @@ function stopMedia() {
   $$("video, audio", body()).forEach((m) => m.pause());
 }
 
-function onClick(e) {
+async function onClick(e) {
   const b = e.target.closest("[data-act]");
   if (!b || !shown) return;
   const act = b.dataset.act;
@@ -144,7 +144,7 @@ function onClick(e) {
   } else if (act === "link") copyLink(shown.path, shown.it.dir);
   else if (act === "more") {
     e.stopPropagation();
-    openMenu(b, itemMenu(shown.it, shown.siblings));
+    openMenu(b, await itemMenu(shown.it, shown.siblings));
   } else if (act === "pick") {
     const it = shown.list[+b.dataset.i];
     it.dir ? openItem(it) : setActive(it, shown.list, { scroll: true });

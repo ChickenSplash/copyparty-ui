@@ -1,12 +1,12 @@
 import { $ } from "../core/dom.js";
 import { parentOf } from "../core/paths.js";
-import { state, can, clearSelection } from "../core/state.js";
+import { state, clearSelection } from "../core/state.js";
 import { isDialogOpen } from "../ui/dialog.js";
 import { closeMenu, isMenuOpen } from "../ui/menu.js";
 import { isViewerOpen, closeViewer, stepViewer } from "./viewer.js";
 import { clearSearch } from "./search.js";
 import { selectAll, stepActive } from "./listing.js";
-import { removeItems, openItem, setActive } from "./actions.js";
+import { deleteSelection, openItem, setActive } from "./actions.js";
 import { navigate } from "./nav.js";
 import { isUsageOpen } from "./usage.js";
 
@@ -40,7 +40,7 @@ function onKey(e) {
   }
   if (e.key === "/") { e.preventDefault(); $("#search").focus(); }
   else if ((e.ctrlKey || e.metaKey) && e.key === "a") { e.preventDefault(); selectAll(); }
-  else if (e.key === "Delete" && state.sel.size && can("delete")) removeItems([...state.sel]);
+  else if (e.key === "Delete" && state.sel.size) deleteSelection();
   else if (e.key === "Backspace" && state.cwd !== "/") navigate(parentOf(state.cwd));
 }
 
