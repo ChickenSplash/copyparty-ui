@@ -1,6 +1,6 @@
 import { $ } from "../core/dom.js";
 import { login, logout } from "../core/api.js";
-import { on } from "../core/state.js";
+import { on, emit } from "../core/state.js";
 import { navigate } from "./nav.js";
 
 export function showLogin(msg = "") {
@@ -36,7 +36,9 @@ export function initAuth() {
   $("#logout-btn").onclick = async () => {
     try { await logout(); } catch {}
     history.replaceState(null, "", "/");
-    showLogin();
+    // Drops every cached listing, the tree and the pane, so the next account
+    // never sees (or requests) this one's folders.
+    emit("unauthorized");
   };
   on("unauthorized", () => showLogin());
 }
