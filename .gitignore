@@ -4,6 +4,7 @@ dev/copyparty-sfx.py
 dev/hist/
 dev/data/
 dev/data-backups/
+dev/data-shared/
 *.log
 node_modules/
 tests/shots/

@@ -42,6 +42,11 @@ export async function login(password) {
 
 export const logout = () => post("/", { act: "logout" });
 
+// Whether the session is signed in, for telling "signed out" from "no access here".
+export async function signedIn() {
+  try { return (await (await api("/?ls")).json()).acct !== "*"; } catch { return false; }
+}
+
 /* ---------- reading ---------- */
 
 // One folder. Folder entries include their recursive size and file count.
