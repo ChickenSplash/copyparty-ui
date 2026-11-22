@@ -63,12 +63,14 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 /* brand */
 .brand-mark {
   width: 26px; height: 26px; border-radius: 8px; flex: none;
+  display: grid; place-items: center;
   background:
     radial-gradient(120% 120% at 0% 0%, var(--accent-2), transparent 60%),
     linear-gradient(135deg, var(--accent), #b07cff);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 6px 16px -6px var(--accent);
 }
 .brand-mark.big { width: 48px; height: 48px; border-radius: 14px; margin: 0 auto 18px; }
+.brand-i { width: 62%; height: 62%; fill: #fff; }
 
 /* file-type icons */
 .ficon {

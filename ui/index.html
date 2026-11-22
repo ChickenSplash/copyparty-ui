@@ -23,7 +23,7 @@
 <body>
   <div id="login" class="login" hidden>
     <form class="login-card" id="login-form" autocomplete="on">
-      <div class="brand-mark big"></div>
+      <div class="brand-mark big"><svg class="brand-i" aria-hidden="true"><use href="#i-brand"/></svg></div>
       <h1>Files</h1>
       <p class="muted">Sign in to continue</p>
       <input type="text" name="username" autocomplete="username" value="homelab" hidden>
@@ -37,7 +37,7 @@
     <header class="topbar">
       <button class="icon-btn" id="sidebar-btn" title="Toggle sidebar" aria-controls="sidebar"><svg class="i"><use href="#i-sidebar"/></svg></button>
       <a class="brand" href="/" data-nav="/">
-        <span class="brand-mark"></span>
+        <span class="brand-mark"><svg class="brand-i" aria-hidden="true"><use href="#i-brand"/></svg></span>
         <span class="brand-name" id="brand-name">Files</span>
       </a>
       <label class="search">
@@ -145,6 +145,8 @@
       <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
       <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></symbol>
       <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></symbol>
+      <!-- the logo's folder, as in the favicon -->
+      <symbol id="i-brand" viewBox="7 7 18 18"><path d="M9 11.5a2 2 0 0 1 2-2h3.6l2 2H21a2 2 0 0 1 2 2V20a2 2 0 0 1-2 2H11a2 2 0 0 1-2-2z"/></symbol>
       <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 7.5a2 2 0 0 1 2-2h3.8l2 2.2h7.2a2 2 0 0 1 2 2v7.8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></symbol>
       <symbol id="i-folder-plus" viewBox="0 0 24 24"><path d="M3.5 7.5a2 2 0 0 1 2-2h3.8l2 2.2h7.2a2 2 0 0 1 2 2v7.8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2zM12 11v5M9.5 13.5h5"/></symbol>
       <symbol id="i-folder-open" viewBox="0 0 24 24"><path d="M4 17.5V7.5a2 2 0 0 1 2-2h3.3l2 2.2H17a2 2 0 0 1 2 2V11"/><path d="M4 17.5 6.3 12a1.6 1.6 0 0 1 1.5-1h12.4a.9.9 0 0 1 .8 1.3l-2.3 5.4a1.6 1.6 0 0 1-1.5 1H5.2A1.2 1.2 0 0 1 4 17.5z"/></symbol>
