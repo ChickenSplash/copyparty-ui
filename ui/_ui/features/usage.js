@@ -1,16 +1,15 @@
-// The storage usage modal: a sunburst of the whole file store, with the folder
-// it was opened from (and everything inside it) highlighted. Click a slice to
-// zoom into it, the middle to zoom out; double-click a folder to open it.
+// The storage usage modal: a sunburst of the whole file store, opened on the
+// folder it was opened from. Click a slice to zoom into it, the middle to zoom
+// out; double-click a folder to open it.
 import { $, $$, esc, icon } from "../core/dom.js";
 import { fmtSize, plural } from "../core/format.js";
 import { state, on } from "../core/state.js";
 import { getUsage, findNode, lineage } from "../core/usage.js";
-import { layout, arcFor, sunburstSvg, RINGS } from "../views/sunburst.js";
+import { layout, sunburstSvg } from "../views/sunburst.js";
 import { navigate } from "./nav.js";
 
 let data = null; // { root, source, at } from getUsage()
 let focus = null; // the folder in the middle
-let hl = null; // the highlighted folder
 let arcs = [];
 let wantPath = "/";
 let seq = 0;
@@ -29,17 +28,6 @@ function arcLabel(a) {
   if (a.kind === "dir") return nameOf(a.node);
   if (a.kind === "files") return `Files in ${nameOf(a.parent)}`;
   return `${plural(a.n, "smaller folder")}`;
-}
-
-// The shallowest folder to centre on that still draws `node` as its own slice,
-// with a ring of what's inside it when it has subfolders.
-function focusFor(node) {
-  const chain = lineage(node);
-  for (const f of chain.slice(0, -1)) {
-    const a = arcFor(layout(f), node);
-    if (a?.kind === "dir" && (a.d < RINGS || !node.dirs.length)) return f;
-  }
-  return node.parent || node;
 }
 
 /* ---------- drawing ---------- */
@@ -70,22 +58,6 @@ function contentsHtml() {
   }).join("") + `</ul>`;
 }
 
-function hlHtml() {
-  if (!hl || !hl.parent) return "";
-  const zoomed = focus === hl;
-  return `<div class="us-hl">` +
-    `<p class="section-label">Highlighted</p>` +
-    `<h3><span class="tic k-dir">${icon("folder")}</span><span>${esc(nameOf(hl))}</span></h3>` +
-    `<dl class="pv-meta">` +
-      `<dt>Size</dt><dd>${fmtSize(hl.sz)} · ${plural(hl.n, "file")}</dd>` +
-      `<dt>Share</dt><dd>${pct(hl.sz, data.root.sz)} of everything` + (hl.parent.parent ? `, ${pct(hl.sz, hl.parent.sz)} of ${esc(nameOf(hl.parent))}` : "") + `</dd>` +
-    `</dl>` +
-    `<div class="us-actions">` +
-      `<button class="btn primary sm" data-act="open">${icon("folder")}<span>Open folder</span></button>` +
-      (zoomed ? "" : `<button class="btn ghost sm" data-act="zoom-hl">${icon("search")}<span>Zoom in</span></button>`) +
-    `</div></div>`;
-}
-
 function footHtml() {
   const when = new Date(data.at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
   const note = data.source === "index"
@@ -97,8 +69,8 @@ function footHtml() {
 function render() {
   arcs = layout(focus);
   $("#usage-crumbs").innerHTML = crumbsHtml();
-  $("#usage-chart").innerHTML = sunburstSvg(focus, arcs, { hl, center: centerLines(null) });
-  $("#usage-side").innerHTML = hlHtml() + contentsHtml();
+  $("#usage-chart").innerHTML = sunburstSvg(focus, arcs, centerLines(null));
+  $("#usage-side").innerHTML = contentsHtml();
   $("#usage-foot").innerHTML = footHtml();
 }
 
@@ -126,13 +98,12 @@ async function load(fresh = false) {
     if (n === seq) message("Couldn't measure folders", err.message);
     return;
   }
-  hl = findNode(data.root, wantPath) || data.root;
-  focus = hl === data.root ? data.root : focusFor(hl);
+  focus = findNode(data.root, wantPath) || data.root;
   if (!data.root.sz) return message("Nothing stored yet", "Upload something and it shows up here.");
   render();
 }
 
-// Open the usage view with the folder at `path` highlighted ("/" for none).
+// Open the usage view on the folder at `path`.
 export function openUsage(path = "/") {
   wantPath = path;
   if (!dlg().open) dlg().showModal();
@@ -155,8 +126,6 @@ function onClick(e) {
   if (t.dataset.zoom != null) return zoom(lineage(focus)[+t.dataset.zoom]);
   if (t.hasAttribute("data-core")) return zoom(focus.parent);
   const act = t.dataset.act;
-  if (act === "open") { dlg().close(); return navigate(hl.path); }
-  if (act === "zoom-hl") return zoom(hl);
   if (act === "refresh") return load(true);
   const a = arcs[+t.dataset.k];
   if (!a) return;

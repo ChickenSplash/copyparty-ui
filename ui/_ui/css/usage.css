@@ -30,11 +30,6 @@
   font-size: 12.5px; color: var(--text-3);
 }
 
-/* highlighted folder card */
-.us-hl { margin-bottom: 22px; }
-.us-hl h3 { display: flex; align-items: center; gap: 9px; margin: 0 0 14px; font-size: 15px; font-weight: 620; overflow-wrap: anywhere; }
-.us-hl .pv-meta { margin-bottom: 14px; }
-.us-actions { display: flex; gap: 8px; }
 .us-list button.hover { background: var(--hover); color: var(--text); }
 
 /* the sunburst: hue per top-level folder (h0..h7), lighter per ring (d1..d5) */
@@ -50,14 +45,10 @@
 :root[data-theme="light"] .usage .d3 { --l: .68; } :root[data-theme="light"] .usage .d4 { --l: .73; }
 :root[data-theme="light"] .usage .d5 { --l: .78; }
 
-.arc { fill: var(--sb); cursor: zoom-in; transition: opacity .18s, filter .12s; }
+.arc { fill: var(--sb); cursor: zoom-in; transition: filter .12s; }
 .arc.files { fill: color-mix(in srgb, var(--text-3) 20%, transparent); }
 .arc.other { fill: color-mix(in srgb, var(--text-3) 50%, transparent); }
 .arc:hover, .arc.hover { filter: brightness(1.15) saturate(1.1); stroke: var(--text); stroke-width: 1.5; }
-.has-hl .arc.anc { opacity: .55; }
-.has-hl .arc.dim { opacity: .2; }
-.has-hl .arc.dim:hover, .has-hl .arc.dim.hover, .has-hl .arc.anc:hover, .has-hl .arc.anc.hover { opacity: .8; }
-.hl-outline { fill: none; stroke: var(--text); stroke-width: 2.2; stroke-linejoin: round; pointer-events: none; }
 .arcs { transform-origin: center; animation: sb-in .28s cubic-bezier(.2, .8, .3, 1); }
 @keyframes sb-in { from { opacity: 0; transform: scale(.9) rotate(-8deg); } }
 @media (prefers-reduced-motion: reduce) { .arcs { animation: none; } }
@@ -65,7 +56,6 @@
 .core { fill: var(--surface-2); stroke: var(--line-2); stroke-width: 1; transition: fill .15s; }
 .core.up { cursor: zoom-out; }
 .core.up:hover { fill: color-mix(in srgb, var(--surface-2) 80%, var(--text) 8%); }
-.core.hl { stroke: var(--text); stroke-width: 2.2; }
 .sunburst text { text-anchor: middle; dominant-baseline: middle; pointer-events: none; font-variant-numeric: tabular-nums; }
 .core-t { fill: var(--text); font-size: 13px; font-weight: 620; }
 .core-s { fill: var(--text-2); font-size: 12px; }
@@ -87,5 +77,4 @@
   .usage-chart { height: min(92vw, 420px); padding: 10px; }
   .usage-side { overflow: visible; border-left: 0; border-top: 1px solid var(--line); }
   .usage-foot { padding: 10px 16px; }
-  .us-actions .btn span { display: inline; } /* keep the labels the toolbar drops on mobile */
 }

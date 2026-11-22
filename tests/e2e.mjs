@@ -268,43 +268,40 @@ await step("usage: crawl fallback agrees", async () => {
 const arcEvent = (sel, type) => page.$eval(sel, (el, type) => el.dispatchEvent(
   type === "pointerover" ? new PointerEvent(type, { bubbles: true }) : new MouseEvent(type, { bubbles: true, detail: type === "dblclick" ? 2 : 1 })), type);
 const centre = () => page.$$eval("#usage-chart text", (t) => t.map((x) => x.textContent).join(" / "));
-await step("usage: opens with the folder highlighted", async () => {
+const usageAt = (name) => page.waitForSelector(`#usage[open] #usage-crumbs [aria-current]:has-text("${name}")`);
+await step("usage: opens on the folder, nothing highlighted", async () => {
   await page.goto(B + "/Backups/Pictures/"); await page.waitForSelector('.row:has-text("2024")');
   await page.hover('.row:has-text("2024")'); await page.click('.row:has-text("2024") [data-usage]');
-  await page.waitForSelector("#usage[open] .sunburst.has-hl");
-  if ((await page.textContent("#usage .us-hl h3")).trim() !== "2024") throw new Error("wrong folder highlighted");
-  if (!(await page.$("#usage .hl-outline")) || !(await page.$("#usage .arc.dim"))) throw new Error("no outline or dimming");
+  await usageAt("2024");
+  if (await page.$("#usage .has-hl, #usage .hl-outline, #usage .arc.dim, #usage .us-hl")) throw new Error("still highlights");
   if (page.url() !== B + "/Backups/Pictures/") throw new Error("opening it navigated");
   await page.waitForTimeout(400); await shot("22-usage");
   console.log("   ", await page.textContent("#usage-crumbs"), "·", await page.$$eval("#usage .arc", (a) => a.length), "arcs ·", await centre());
 });
 await step("usage: hover, zoom, open", async () => {
-  await arcEvent("#usage .arc.hl", "pointerover");
-  if (!(await centre()).startsWith("2024 /")) throw new Error("hover didn't show in the middle: " + (await centre()));
-  await arcEvent("#usage .arc.hl", "click");
-  await page.waitForSelector('#usage-crumbs [aria-current]:has-text("2024")');
-  await page.keyboard.press("Backspace"); await page.waitForSelector('#usage-crumbs [aria-current]:has-text("Pictures")');
+  await page.keyboard.press("Backspace"); await usageAt("Pictures");
   if (!page.url().endsWith("/Backups/Pictures/")) throw new Error("Backspace navigated the page");
-  await page.click('#usage-crumbs [data-zoom="0"]'); await page.waitForSelector('#usage-crumbs [aria-current]:has-text("Home")');
+  const k = await page.$eval('#usage .us-list button:has-text("2024")', (b) => b.dataset.k);
+  await arcEvent(`#usage .arc[data-k="${k}"]`, "pointerover");
+  if (!(await centre()).startsWith("2024 /")) throw new Error("hover didn't show in the middle: " + (await centre()));
+  await arcEvent(`#usage .arc[data-k="${k}"]`, "click"); await usageAt("2024");
+  await page.click('#usage-crumbs [data-zoom="0"]'); await usageAt("Home");
   await page.click("#usage [data-core]"); // already at the top: nothing happens
-  await page.click('#usage [data-act="zoom-hl"]'); await page.waitForSelector('#usage-crumbs [aria-current]:has-text("2024")');
-  await page.click('#usage [data-act="open"]'); await page.waitForURL(/\/Backups\/Pictures\/2024\/$/);
-  await page.waitForSelector("#usage", { state: "hidden" });
-  await page.click("#storage"); await page.waitForSelector("#usage[open] .sunburst");
-  await arcEvent("#usage .arc.anc", "dblclick"); await page.waitForURL(B + "/Backups/"); // the first parent slice: Backups, in ring 1
+  await usageAt("Home");
+  const b = await page.$eval('#usage .us-list button:has-text("Backups")', (x) => x.dataset.k);
+  await arcEvent(`#usage .arc[data-k="${b}"]`, "dblclick"); await page.waitForURL(B + "/Backups/");
   await page.waitForSelector("#usage", { state: "hidden" });
   console.log("    double-click opened", new URL(page.url()).pathname);
 });
 await step("usage: from the tree, pane and top bar", async () => {
   await page.goto(B + "/"); await page.waitForSelector('.tnode[data-path="/Docs/"]');
   await page.click('.tnode[data-path="/Docs/"]', { button: "right" }); await page.click("#menu >> text=Storage usage");
-  await page.waitForSelector('#usage[open] .us-hl h3:has-text("Docs")'); await page.keyboard.press("Escape");
+  await usageAt("Docs"); await page.keyboard.press("Escape");
   await page.waitForSelector("#usage", { state: "hidden" });
-  await page.click('#pane-body [data-act="usage"]'); await page.waitForSelector("#usage[open] .sunburst");
-  if (await page.$("#usage .us-hl")) throw new Error("Home shouldn't highlight anything");
+  await page.click('#pane-body [data-act="usage"]'); await usageAt("Home");
   await page.mouse.click(5, 5); await page.waitForSelector("#usage", { state: "hidden" }); // the backdrop closes it
   await page.click("#theme-btn"); await page.goto(B + "/Backups/Vault/"); await page.waitForSelector(".row[data-i], .empty");
-  await page.click("#storage"); await page.waitForSelector('#usage[open] .us-hl h3:has-text("Vault")');
+  await page.click("#storage"); await usageAt("Vault");
   await page.waitForTimeout(400); await shot("23-usage-light"); await page.keyboard.press("Escape"); await page.click("#theme-btn");
 });
 // /Backups is its own read-only section inside Home, so actions must follow
@@ -373,7 +370,7 @@ await step("mobile", async () => {
 await step("mobile usage", async () => {
   await page.goto(B + "/Backups/"); await page.waitForSelector('.row:has-text("Pictures")');
   await page.click('.row:has-text("Pictures") [data-more]'); await page.click("#menu >> text=Storage usage");
-  await page.waitForSelector('#usage[open] .us-hl h3:has-text("Pictures")'); await page.waitForTimeout(400);
+  await usageAt("Pictures"); await page.waitForTimeout(400);
   await shot("24-usage-mobile");
   const w = await page.$eval("#usage", (d) => d.offsetWidth);
   if (w !== 390) throw new Error("not full width on mobile: " + w);

@@ -8,7 +8,6 @@
   background: var(--bg);
 }
 .preview-off .pane { display: none; }
-#preview-btn[aria-pressed="true"] { color: var(--accent-2); background: var(--accent-soft); }
 @media (max-width: 1099px) {
   .pane, #preview-btn { display: none; }
 }

@@ -70,7 +70,7 @@ An end-to-end Playwright run against the dev servers: sign in, browse, views, vi
 selection, upload, rename, new folder, delete, search, theme, size bars, the tree (expand,
 open, follow, keyboard, menu), sidebar hide and resize, the preview pane (folder summary,
 click/double-click, keyboard, images, selection, rename, switching off, narrow windows),
-keyboard, folder sizes (du plugin vs the crawl fallback), the usage sunburst (highlight,
+keyboard, folder sizes (du plugin vs the crawl fallback), the usage sunburst (opens on the folder,
 hover, zoom, open, every way in), sign out, mobile drawer and usage view.
 It expects a `Photos/Holiday 2026/` folder of images and a `Docs/` folder with a `notes.txt` in `dev/data/`.
 

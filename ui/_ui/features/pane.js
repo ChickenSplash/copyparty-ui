@@ -177,7 +177,7 @@ function onChanged(paths = []) {
 function sync() {
   state.paneOpen = wanted && wide.matches;
   $("#app").classList.toggle("preview-off", !wanted);
-  $("#preview-btn").setAttribute("aria-pressed", wanted);
+  $("#preview-btn").setAttribute("aria-expanded", wanted);
   if (!state.paneOpen) {
     stopMedia();
     body().innerHTML = "";
